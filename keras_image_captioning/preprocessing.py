@@ -12,7 +12,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.applications import inception_v3
 from operator import itemgetter
 
-import common
+import io_utils
 
 CAPTION_TYPES = ['caption_raw', 'caption_lemmatized']
 INCEPTION_V3_IMG_SIZE = (299, 299)
@@ -31,13 +31,13 @@ def generate_dataset():
     for dataset_type, file_path in [('training', 'Flickr_8k.trainImages.txt'),
                                     ('validation', 'Flickr_8k.devImages.txt'),
                                     ('testing', 'Flickr_8k.testImages.txt')]:
-        img_filenames[dataset_type] = common.read_text_file(
-                common.dataset_text_path(file_path))
+        img_filenames[dataset_type] = io_utils.read_text_file(
+                io_utils.dataset_text_path(file_path))
 
     img_captions = {}
     for caption_type, file_path in [('raw', 'Flickr8k.token.txt'),
                                     ('lemmatized', 'Flickr8k.lemma.token.txt')]:
-        lines = common.read_text_file(common.dataset_text_path(file_path))
+        lines = io_utils.read_text_file(io_utils.dataset_text_path(file_path))
         lines_splitted = map(lambda x: re.split(r'#\d\t', x), lines)
         img_captions[caption_type] = defaultdict(list)
         for img_path, caption in lines_splitted:
@@ -84,7 +84,7 @@ def save_word_index(training):
         tokenizer.fit_on_texts(captions)
 
         filename = 'word_index-{}.json'.format(caption_type)
-        with open(common.dataset_generated_path(filename), 'w') as f:
+        with open(io_utils.dataset_generated_path(filename), 'w') as f:
             json.dump(tokenizer.word_index, f, sort_keys=True)
 
     return tokenizer
@@ -116,7 +116,7 @@ def save_caption(dataset_type, batch, batch_number, tokenizer):
         batch_filename = '{}-{:0>3}-{}.npz'.format(dataset_type,
                                                    batch_number,
                                                    caption_type)
-        batch_filepath = common.dataset_generated_path(batch_filename)
+        batch_filepath = io_utils.dataset_generated_path(batch_filename)
         np.savez_compressed(batch_filepath, allow_pickle=False,
                             **pack_list(captions_encoded))
 
@@ -124,13 +124,13 @@ def save_caption(dataset_type, batch, batch_number, tokenizer):
 
 
 def save_image(dataset_type, batch, batch_number):
-    img_paths = map(common.dataset_img_path,
+    img_paths = map(io_utils.dataset_img_path,
                     map(itemgetter('img_filename'), batch))
     imgs = map(load_img_to_array, img_paths)
     imgs = map(inception_v3.preprocess_input, imgs)
 
     batch_filename = '{}-{:0>3}-image.npz'.format(dataset_type, batch_number)
-    batch_filepath = common.dataset_generated_path(batch_filename)
+    batch_filepath = io_utils.dataset_generated_path(batch_filename)
     np.savez_compressed(batch_filepath, allow_pickle=False,
                         **pack_list(imgs))
 
