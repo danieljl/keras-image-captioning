@@ -31,7 +31,8 @@ def generate_dataset():
     for dataset_type, file_path in [('training', 'Flickr_8k.trainImages.txt'),
                                     ('validation', 'Flickr_8k.devImages.txt'),
                                     ('testing', 'Flickr_8k.testImages.txt')]:
-        img_filenames[dataset_type] = common.read_text_file(common.dataset_text_path(file_path))
+        img_filenames[dataset_type] = common.read_text_file(
+                common.dataset_text_path(file_path))
 
     img_captions = {}
     for caption_type, file_path in [('raw', 'Flickr8k.token.txt'),
@@ -51,7 +52,7 @@ def generate_dataset():
                          caption_raw=caption_raw,
                          caption_lemmatized=caption_lemmatized)
             dataset[dataset_type].append(datum)
-    
+
     return dataset
 
 
@@ -59,11 +60,13 @@ def flatten_dataset(dataset):
     dataset_flattened = defaultdict(list)
     for dataset_type, data in dataset.iteritems():
         for datum in data:
-            for caption_raw, caption_lemmatized in zip(datum['caption_raw'],
-                                                       datum['caption_lemmatized']):
-                dataset_flattened[dataset_type].append(dict(img_filename=datum['img_filename'],
-                                                       caption_raw=caption_raw + ' <eos>',
-                                                       caption_lemmatized=caption_lemmatized + ' <eos>'))
+            for caption_raw, caption_lemmatized in zip(
+                    datum['caption_raw'],
+                    datum['caption_lemmatized']):
+                dataset_flattened[dataset_type].append(
+                        dict(img_filename=datum['img_filename'],
+                        caption_raw=caption_raw + ' <eos>',
+                        caption_lemmatized=caption_lemmatized + ' <eos>'))
 
     random.seed(42)  # For reproducibility
     for datum_list in dataset_flattened.itervalues():
@@ -83,7 +86,7 @@ def save_word_index(training):
         filename = 'word_index-{}.json'.format(caption_type)
         with open(common.dataset_generated_path(filename), 'w') as f:
             json.dump(tokenizer.word_index, f, sort_keys=True)
-    
+
     return tokenizer
 
 
