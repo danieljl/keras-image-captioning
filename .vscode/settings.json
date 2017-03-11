@@ -1,0 +1,6 @@
+{
+    "python.pythonPath": "/home/daniel/miniconda3/envs/mlnd-capstone/bin/python",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "python.linting.flake8Args": ["--ignore=E126,E128,E203,E501"]
+}
