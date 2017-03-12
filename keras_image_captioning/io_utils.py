@@ -97,7 +97,7 @@ def dataset_reader(dataset_type, caption_type, batch_size, tokenizer):
 
             pair_queue = zip(image_queue, caption_queue)
             np.random.shuffle(pair_queue)
-            image_queue, caption_queue = zip(*pair_queue)
+            image_queue, caption_queue = map(list, zip(*pair_queue))
 
             while len(image_queue) >= batch_size:
                 image_batch = [image_queue.pop()
