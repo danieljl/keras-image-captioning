@@ -1,5 +1,7 @@
+import errno
 import json
 import numpy as np
+import os
 
 from glob import glob
 from keras.preprocessing import sequence as keras_seq
@@ -31,6 +33,16 @@ def dataset_generated_path(path=''):
 
 def var_path(path=''):
     return VAR_ROOT_DIR + path
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
 
 def read_text_file(path):
