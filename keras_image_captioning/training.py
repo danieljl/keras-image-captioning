@@ -40,7 +40,8 @@ def main(num_epoch):
                             num_epoch,
                             validation_data=validation,
                             nb_val_samples=io_utils.NUM_VALIDATION_SAMPLES,
-                            max_q_size=5,
+                            max_q_size=10,
+                            nb_worker=1,
                             callbacks=callbacks)
 
 
