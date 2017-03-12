@@ -12,12 +12,15 @@ def main(num_epoch):
     num_epoch = int(num_epoch)
     caption_type = 'lemmatized'
     batch_size = 32
+    embedding_size = 300
+    lstm_output_size = 256
+    dropout_rate = 0.3
 
     tokenizer = io_utils.build_tokenizer(caption_type)
     the_model = model.build_model(vocab_size=len(tokenizer.word_index),
-                                  embedding_size=300,
-                                  lstm_output_size=256,
-                                  dropout_rate=0.5)
+                                  embedding_size=embedding_size,
+                                  lstm_output_size=lstm_output_size,
+                                  dropout_rate=dropout_rate)
     training = io_utils.dataset_reader('training', caption_type, batch_size,
                                        tokenizer)
     validation = io_utils.dataset_reader('validation', caption_type,

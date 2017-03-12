@@ -2,8 +2,8 @@ import tensorflow as tf
 
 from keras.applications.inception_v3 import InceptionV3
 from keras.models import Model, Sequential
-from keras.layers import (Dense, Dropout, Embedding, Input, LSTM, Merge,
-                          RepeatVector, TimeDistributed)
+from keras.layers import (Dense, Embedding, Input, LSTM, Merge, RepeatVector,
+                          TimeDistributed)
 
 
 def build_model(vocab_size,
@@ -18,7 +18,6 @@ def build_model(vocab_size,
     flatten_tensor = image_model.layers[-2].output
 
     dense_embed = Dense(embedding_size)(flatten_tensor)
-    dense_embed = Dropout(dropout_rate)(dense_embed)
     # Add timestep dimension
     dense_embed_expanded = RepeatVector(1)(dense_embed)
     image_embedding_model = Model(input=image_model.input,
@@ -27,7 +26,6 @@ def build_model(vocab_size,
     sentence_input = Input(shape=[None])
     word_embedding = Embedding(input_dim=vocab_size,
                                output_dim=embedding_size)(sentence_input)
-    word_embedding = Dropout(dropout_rate)(word_embedding)
     word_embedding_model = Model(input=sentence_input, output=word_embedding)
 
     lstm_input_seq = Merge([image_embedding_model, word_embedding_model],
@@ -35,7 +33,11 @@ def build_model(vocab_size,
 
     model = Sequential()
     model.add(lstm_input_seq)
-    model.add(LSTM(output_dim=lstm_output_size, return_sequences=True))
+    model.add(LSTM(output_dim=lstm_output_size,
+                   return_sequences=True,
+                   dropout_W=dropout_rate,
+                   dropout_U=dropout_rate,
+                   consume_less='gpu'))
     model.add(TimeDistributed(Dense(output_dim=vocab_size)))
 
     model.compile(optimizer='adam',
