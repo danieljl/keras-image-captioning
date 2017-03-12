@@ -1,7 +1,6 @@
 import json
 import numpy as np
 
-from collections import deque
 from glob import glob
 from keras.preprocessing import sequence as keras_seq
 from keras.preprocessing import text as keras_txt
@@ -66,19 +65,32 @@ def dataset_reader(dataset_type, caption_type, batch_size, tokenizer):
     caption_pattern = '{}-*-caption_{}.npz'.format(dataset_type, caption_type)
     image_filepaths = sorted(glob(dataset_generated_path(image_pattern)))
     caption_filepaths = sorted(glob(dataset_generated_path(caption_pattern)))
-    combined_filepaths = zip(image_filepaths, caption_filepaths)
+    pair_filepaths = zip(image_filepaths, caption_filepaths)
 
-    image_queue, caption_queue = deque(), deque()
+    image_queue, caption_queue = [], []
+    is_odd_batch = True
     while True:
-        np.random.shuffle(combined_filepaths)
-        for image_filename, caption_filename in combined_filepaths:
-            image_queue.extend(load_dataset(image_filename))
-            caption_queue.extend(load_dataset(caption_filename))
+        np.random.shuffle(pair_filepaths)
+        for image_filepath, caption_filepath in pair_filepaths:
+            image_queue.extend(load_dataset(image_filepath))
+            caption_queue.extend(load_dataset(caption_filepath))
+
+            # Before shuffling, there should be two batches in the queue in
+            # order to be more random.
+            if is_odd_batch:
+                is_odd_batch = False
+                continue
+            else:
+                is_odd_batch = True
+
+            pair_queue = zip(image_queue, caption_queue)
+            np.random.shuffle(pair_queue)
+            image_queue, caption_queue = zip(*pair_queue)
 
             while len(image_queue) >= batch_size:
-                image_batch = [image_queue.popleft()
+                image_batch = [image_queue.pop()
                                for _ in range(batch_size)]
-                caption_batch = [caption_queue.popleft()
+                caption_batch = [caption_queue.pop()
                                  for _ in range(batch_size)]
                 yield preprocess_batch(image_batch, caption_batch, tokenizer)
 
