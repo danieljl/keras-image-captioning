@@ -3,13 +3,14 @@
 import sys
 
 from keras.callbacks import ModelCheckpoint, TensorBoard
+from math import ceil
 
 import io_utils
 import model
 
 
-def main(num_epoch):
-    num_epoch = int(num_epoch)
+def main(epochs):
+    epochs = int(epochs)
     caption_type = 'lemmatized'
     batch_size = 32
     embedding_size = 300
@@ -38,13 +39,17 @@ def main(num_epoch):
                               write_graph=True)
     callbacks = [model_checkpoint, tensorboard]
 
+    steps_per_epoch = int(ceil(1. * io_utils.NUM_TRAINING_SAMPLES /
+                               batch_size))
+    validation_steps = int(ceil(1. * io_utils.NUM_VALIDATION_SAMPLES /
+                                batch_size))
     the_model.fit_generator(training,
-                            io_utils.NUM_TRAINING_SAMPLES,
-                            num_epoch,
+                            steps_per_epoch,
+                            epochs=epochs,
                             validation_data=validation,
-                            nb_val_samples=io_utils.NUM_VALIDATION_SAMPLES,
+                            validation_steps=validation_steps,
                             max_q_size=10,
-                            nb_worker=1,
+                            workers=1,
                             callbacks=callbacks)
 
 

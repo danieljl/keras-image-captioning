@@ -1,9 +1,10 @@
 import tensorflow as tf
 
 from keras.applications.inception_v3 import InceptionV3
-from keras.models import Model, Sequential
-from keras.layers import (Dense, Embedding, Input, LSTM, Merge, RepeatVector,
+from keras.models import Model
+from keras.layers import (Dense, Embedding, Input, LSTM, RepeatVector,
                           TimeDistributed)
+from keras.layers.merge import Concatenate
 
 
 def build_model(vocab_size,
@@ -17,28 +18,23 @@ def build_model(vocab_size,
     # Discard the last Dense layer
     flatten_tensor = image_model.layers[-2].output
 
-    dense_embed = Dense(embedding_size)(flatten_tensor)
-    # Add timestep dimension
-    dense_embed_expanded = RepeatVector(1)(dense_embed)
-    image_embedding_model = Model(input=image_model.input,
-                                  output=dense_embed_expanded)
+    image_dense = Dense(units=embedding_size)(flatten_tensor)
+    image_embedding = RepeatVector(1)(image_dense)  # Add timestep dimension
 
     sentence_input = Input(shape=[None])
     word_embedding = Embedding(input_dim=vocab_size,
                                output_dim=embedding_size)(sentence_input)
-    word_embedding_model = Model(input=sentence_input, output=word_embedding)
 
-    lstm_input_seq = Merge([image_embedding_model, word_embedding_model],
-                           mode='concat', concat_axis=1)
+    lstm_input_seq = Concatenate(axis=1)([image_embedding, word_embedding])
 
-    model = Sequential()
-    model.add(lstm_input_seq)
-    model.add(LSTM(output_dim=lstm_output_size,
-                   return_sequences=True,
-                   dropout_W=dropout_rate,
-                   dropout_U=dropout_rate,
-                   consume_less='gpu'))
-    model.add(TimeDistributed(Dense(output_dim=vocab_size)))
+    lstm = LSTM(units=lstm_output_size,
+                return_sequences=True,
+                dropout=dropout_rate,
+                recurrent_dropout=dropout_rate,
+                implementation=2)(lstm_input_seq)
+    time_dist_dense = TimeDistributed(Dense(units=vocab_size))(lstm)
+    model = Model(inputs=[image_model.input, sentence_input],
+                  outputs=time_dist_dense)
 
     model.compile(optimizer='adam',
                   loss=categorical_crossentropy_from_logits,
