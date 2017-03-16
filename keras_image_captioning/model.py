@@ -5,6 +5,7 @@ from keras.models import Model
 from keras.layers import (Dense, Embedding, Input, LSTM, RepeatVector,
                           TimeDistributed)
 from keras.layers.merge import Concatenate
+from keras.optimizers import Adam
 
 
 def build_model(vocab_size,
@@ -36,7 +37,7 @@ def build_model(vocab_size,
     model = Model(inputs=[image_model.input, sentence_input],
                   outputs=time_dist_dense)
 
-    model.compile(optimizer='adam',
+    model.compile(optimizer=Adam(lr=0.0005),
                   loss=categorical_crossentropy_from_logits,
                   metrics=[categorical_accuracy_with_variable_timestep])
     return model
