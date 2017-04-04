@@ -2,6 +2,7 @@
 
 import sys
 
+from datetime import datetime
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from math import ceil
 
@@ -27,13 +28,17 @@ def main(epochs):
     validation = io_utils.dataset_reader('validation', caption_type,
                                          batch_size, tokenizer)
 
-    model_path = io_utils.var_path('checkpoint/'
-                                   'model.{epoch:03d}-{val_loss:.2f}.hdf5')
+    experiment_label = 'exp-{}'.format(datetime.utcnow()).replace(' ', 'T')
+    io_utils.mkdir_p(io_utils.model_checkpoints_path(experiment_label))
+    io_utils.mkdir_p(io_utils.tensorboard_logs_path(experiment_label))
+
+    model_path = io_utils.model_checkpoints_path(experiment_label +
+            '/model.{epoch:03d}-{val_loss:.2f}.hdf5')
     model_checkpoint = ModelCheckpoint(model_path,
                                        monitor='val_loss',
                                        mode='min',
                                        period=1)
-    log_dir = io_utils.var_path('tensorboard')
+    log_dir = io_utils.tensorboard_logs_path(experiment_label)
     tensorboard = TensorBoard(log_dir=log_dir,
                               histogram_freq=1,
                               write_graph=True)

@@ -19,7 +19,6 @@ lib/
 lib64/
 parts/
 sdist/
-var/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -90,3 +89,8 @@ ENV/
 
 # VSCode ctags file
 .vscode/tags
+
+# Directory for storing datasets, model checkpoints, logs
+/var/**
+!/var/**/
+!/var/**/.gitkeep

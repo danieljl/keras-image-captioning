@@ -8,15 +8,22 @@ from keras.preprocessing import sequence as keras_seq
 from keras.preprocessing import text as keras_txt
 
 
-DATASET_ROOT_DIR = '../../datasets/flickr8k/'
-VAR_ROOT_DIR = '../../var/'
+def path_from_here(path):
+    return os.path.join(os.path.dirname(__file__), path)
+
+
+VAR_ROOT_DIR = path_from_here('../var/')
 NUM_TRAINING_SAMPLES = 5 * 6000
 NUM_VALIDATION_SAMPLES = 5 * 1000
 NUM_TESTING_SAMPLES = 5 * 1000
 
 
+def var_path(path=''):
+    return VAR_ROOT_DIR + path
+
+
 def dataset_path(path=''):
-    return DATASET_ROOT_DIR + path
+    return var_path('datasets/flickr8k/' + path)
 
 
 def dataset_img_path(path=''):
@@ -31,8 +38,12 @@ def dataset_generated_path(path=''):
     return dataset_path('generated/' + path)
 
 
-def var_path(path=''):
-    return VAR_ROOT_DIR + path
+def model_checkpoints_path(path=''):
+    return var_path('model-checkpoints/' + path)
+
+
+def tensorboard_logs_path(path=''):
+    return var_path('tensorboard-logs/' + path)
 
 
 def mkdir_p(path):
