@@ -14,6 +14,7 @@ enum34==1.1.6             # via traitlets
 first==2.0.1              # via pip-tools
 funcsigs==1.0.2           # via mock
 futures==3.0.5
+h5py==2.7.0
 ipykernel==4.5.2
 ipython-genutils==0.2.0   # via traitlets
 ipython==5.3.0            # via ipykernel
@@ -21,7 +22,7 @@ jupyter-client==5.0.0     # via ipykernel
 jupyter-core==4.3.0       # via jupyter-client
 keras==2.0.2
 mock==2.0.0               # via tensorflow
-numpy==1.12.1             # via scipy, tensorflow, theano
+numpy==1.12.1             # via h5py, scipy, tensorflow, theano
 olefile==0.44             # via pillow
 packaging==16.8           # via setuptools
 pathlib2==2.2.1           # via ipython, pickleshare
@@ -42,7 +43,7 @@ scandir==1.5              # via pathlib2
 scipy==0.19.0             # via theano
 simplegeneric==0.8.1      # via ipython
 singledispatch==3.4.0.3   # via tornado
-six==1.10.0               # via keras, mock, packaging, pathlib2, pip-tools, prompt-toolkit, protobuf, python-dateutil, setuptools, singledispatch, tensorflow, theano, traitlets
+six==1.10.0               # via h5py, keras, mock, packaging, pathlib2, pip-tools, prompt-toolkit, protobuf, python-dateutil, setuptools, singledispatch, tensorflow, theano, traitlets
 tensorflow==1.0.1
 theano==0.9.0             # via keras
 tornado==4.4.3            # via ipykernel
