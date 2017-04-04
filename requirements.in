@@ -1,5 +1,6 @@
 futures
 ipykernel
 keras>=2.0,<3.0
+pillow
 pip-tools
 tensorflow>=1.0,<1.1

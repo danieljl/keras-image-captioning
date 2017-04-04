@@ -22,11 +22,13 @@ jupyter-core==4.3.0       # via jupyter-client
 keras==2.0.2
 mock==2.0.0               # via tensorflow
 numpy==1.12.1             # via scipy, tensorflow, theano
+olefile==0.44             # via pillow
 packaging==16.8           # via setuptools
 pathlib2==2.2.1           # via ipython, pickleshare
 pbr==2.0.0                # via mock
 pexpect==4.2.1            # via ipython
 pickleshare==0.7.4        # via ipython
+pillow==4.0.0
 pip-tools==1.8.2
 prompt-toolkit==1.0.14    # via ipython
 protobuf==3.2.0           # via tensorflow
