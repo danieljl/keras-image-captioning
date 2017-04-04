@@ -21,6 +21,7 @@ INCEPTION_V3_IMG_SIZE = (299, 299)
 def main():
     dataset = generate_dataset()
     dataset_flattened = flatten_dataset(dataset)
+    io_utils.mkdir_p(io_utils.dataset_generated_path())
     tokenizer = save_word_index(dataset_flattened['training'])
     print('word index generated')
     save_dataset(dataset_flattened, tokenizer)
