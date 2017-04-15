@@ -1,6 +1,11 @@
 {
-    "python.pythonPath": "${workspaceRoot}/venv/bin/python",
-    "files.trimTrailingWhitespace": true,
+    "files.exclude": {
+        "venv/": true
+    },
     "files.insertFinalNewline": true,
-    "python.linting.flake8Args": ["--ignore=E126,E128,E203,E501"]
+    "files.trimTrailingWhitespace": true,
+    "python.linting.flake8Args": [
+        "--ignore=E126,E128,E203,E501"
+    ],
+    "python.pythonPath": "${workspaceRoot}/venv/bin/python"
 }
