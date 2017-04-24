@@ -34,8 +34,10 @@ pip-tools==1.8.2
 prompt-toolkit==1.0.14    # via ipython
 protobuf==3.2.0           # via tensorflow
 ptyprocess==0.5.1         # via pexpect
+py==1.4.33                # via pytest
 pygments==2.2.0           # via ipython
 pyparsing==2.2.0          # via packaging
+pytest==3.0.7
 python-dateutil==2.6.0    # via jupyter-client
 pyyaml==3.12              # via keras
 pyzmq==16.0.2             # via jupyter-client
@@ -52,4 +54,4 @@ wcwidth==0.1.7            # via prompt-toolkit
 wheel==0.29.0             # via tensorflow
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools                # via ipython, protobuf
+# setuptools                # via ipython, protobuf, pytest

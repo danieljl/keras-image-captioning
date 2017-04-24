@@ -7,5 +7,9 @@
     "python.linting.flake8Args": [
         "--ignore=E126,E128,E203,E501"
     ],
-    "python.pythonPath": "${workspaceRoot}/venv/bin/python"
+    "python.pythonPath": "${workspaceRoot}/venv/bin/python",
+    "python.unitTest.pyTestArgs": [
+        "keras_image_captioning"
+    ],
+    "python.unitTest.pyTestEnabled": true
 }
