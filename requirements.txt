@@ -39,7 +39,7 @@ pygments==2.2.0           # via ipython
 pyparsing==2.2.0          # via packaging
 pytest==3.0.7
 python-dateutil==2.6.0    # via jupyter-client
-pyyaml==3.12              # via keras
+pyyaml==3.12
 pyzmq==16.0.2             # via jupyter-client
 scandir==1.5              # via pathlib2
 scipy==0.19.0             # via theano
