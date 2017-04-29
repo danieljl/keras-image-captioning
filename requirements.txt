@@ -22,7 +22,7 @@ jupyter-client==5.0.0     # via ipykernel
 jupyter-core==4.3.0       # via jupyter-client
 keras==2.0.2
 mock==2.0.0               # via tensorflow
-numpy==1.12.1             # via h5py, scipy, tensorflow, theano
+numpy==1.12.1
 olefile==0.44             # via pillow
 packaging==16.8           # via setuptools
 pathlib2==2.2.1           # via ipython, pickleshare
