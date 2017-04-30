@@ -1,0 +1,13 @@
+var
+    flickr8k
+        dataset
+            Flickr8k_Dataset
+            Flickr8k_text
+        training-results
+            0001
+                model-checkpoint.hdf5
+                events.out.tfevents.*
+                hyperparams_config.yaml
+                metrics_log.csv
+                training_log.txt
+            ...
