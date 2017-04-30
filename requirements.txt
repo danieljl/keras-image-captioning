@@ -7,30 +7,31 @@
 appdirs==1.4.3            # via setuptools
 backports-abc==0.5        # via tornado
 backports.shutil-get-terminal-size==1.0.0  # via ipython
-certifi==2017.1.23        # via tornado
+backports.ssl-match-hostname==3.5.0.1  # via tornado
+certifi==2017.4.17        # via tornado
 click==6.7                # via pip-tools
 decorator==4.0.11         # via ipython, traitlets
 enum34==1.1.6             # via traitlets
 first==2.0.1              # via pip-tools
 funcsigs==1.0.2           # via mock
-futures==3.0.5
+futures==3.1.1
 h5py==2.7.0
-ipykernel==4.5.2
+ipykernel==4.6.1
 ipython-genutils==0.2.0   # via traitlets
 ipython==5.3.0            # via ipykernel
-jupyter-client==5.0.0     # via ipykernel
+jupyter-client==5.0.1     # via ipykernel
 jupyter-core==4.3.0       # via jupyter-client
-keras==2.0.2
+keras==2.0.4
 mock==2.0.0               # via tensorflow
 numpy==1.12.1
 olefile==0.44             # via pillow
 packaging==16.8           # via setuptools
 pathlib2==2.2.1           # via ipython, pickleshare
-pbr==2.0.0                # via mock
+pbr==3.0.0                # via mock
 pexpect==4.2.1            # via ipython
 pickleshare==0.7.4        # via ipython
-pillow==4.0.0
-pip-tools==1.8.2
+pillow==4.1.1
+pip-tools==1.9.0
 prompt-toolkit==1.0.14    # via ipython
 protobuf==3.2.0           # via tensorflow
 ptyprocess==0.5.1         # via pexpect
@@ -46,11 +47,12 @@ scipy==0.19.0             # via theano
 simplegeneric==0.8.1      # via ipython
 singledispatch==3.4.0.3   # via tornado
 six==1.10.0               # via h5py, keras, mock, packaging, pathlib2, pip-tools, prompt-toolkit, protobuf, python-dateutil, setuptools, singledispatch, tensorflow, theano, traitlets
-tensorflow==1.0.1
+tensorflow==1.1.0
 theano==0.9.0             # via keras
-tornado==4.4.3            # via ipykernel
+tornado==4.5.1            # via ipykernel
 traitlets==4.3.2          # via ipykernel, ipython, jupyter-client, jupyter-core
 wcwidth==0.1.7            # via prompt-toolkit
+werkzeug==0.12.1          # via tensorflow
 wheel==0.29.0             # via tensorflow
 
 # The following packages are considered to be unsafe in a requirements file:

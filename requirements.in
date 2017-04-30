@@ -7,4 +7,4 @@ pillow
 pip-tools
 pytest
 pyyaml
-tensorflow>=1.0,<1.1
+tensorflow>=1.0,<2.0
