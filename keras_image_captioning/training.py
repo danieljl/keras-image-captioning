@@ -12,13 +12,13 @@ from .models import ImageCaptioningModel
 class Training(object):
     def __init__(self,
                  training_label,
-                 config_builder=None,
+                 config_=None,
                  early_stopping_patience=2,
                  max_q_size=10,
                  workers=1,
                  verbose=1):
         self._training_label = training_label
-        self._config_builder = config_builder or config.DefaultConfigBuilder()
+        self._config = config_ or config.DefaultConfigBuilder().build_config()
         self._max_q_size = max_q_size
         self._workers = workers
         self._verbose = verbose
@@ -27,7 +27,7 @@ class Training(object):
         self._prepare_config_and_dataset_provider()
         self._init_result_dir()
         self._init_callbacks()
-        self._write_config()
+        self._write_config(config.active_config())
         self._epochs = config.active_config().epochs
         self._model = ImageCaptioningModel()
         self._model.keras_model.fit_generator(
@@ -46,7 +46,7 @@ class Training(object):
         return self._result_dir
 
     def _prepare_config_and_dataset_provider(self):
-        config.register_config_builder(self._config_builder)
+        config.active_config(self._config)
         self._dataset_provider = DatasetProvider()
         config.init_vocab_size(self._dataset_provider.vocab_size)
 
@@ -86,10 +86,10 @@ class Training(object):
         self._callbacks = [csv_logger, model_checkpoint, tensorboard,
                            earling_stopping]
 
-    def _write_config(self):
+    def _write_config(self, config_):
         CONFIG_FILENAME = 'hyperparams_config.yaml'
         self._config_filepath = self._path_from_result_dir(CONFIG_FILENAME)
-        config.write_to_file(self._config_filepath)
+        config.write_to_file(config_, self._config_filepath)
 
     def _path_from_result_dir(self, *paths):
         return os.path.join(self._result_dir, *paths)

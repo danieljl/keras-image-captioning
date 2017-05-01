@@ -99,22 +99,20 @@ class FileConfigBuilder(ConfigBuilderBase):
 _active_config = DefaultConfigBuilder().build_config()
 
 
-def active_config():
+def active_config(new_active_config=None):
+    if new_active_config:
+        global _active_config
+        _active_config = new_active_config
     return _active_config
 
 
-def register_config_builder(config_builder):
-    global _active_config
-    _active_config = config_builder.build_config()
-
-
 def init_vocab_size(vocab_size):
-    global _active_config
     if _active_config.vocab_size:
         raise RuntimeError('vocab_size has been initialized before!')
+    global _active_config
     _active_config = _active_config._replace(vocab_size=vocab_size)
 
 
-def write_to_file(filepath):
+def write_to_file(config, filepath):
     with open(filepath, 'w') as f:
-        yaml.dump(dict(_active_config._asdict()), f, default_flow_style=False)
+        yaml.dump(dict(config._asdict()), f, default_flow_style=False)
