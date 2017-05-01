@@ -3,11 +3,15 @@ import yaml
 from collections import namedtuple
 from random import choice, randint, uniform
 
+from .common_utils import parse_timedelta
+
 
 Config = namedtuple('Config', '''
     dataset_name
     epochs
+    time_limit
     batch_size
+    reduce_lr_factor
     lemmatize_caption
     rare_words_handling
     words_min_occur
@@ -36,7 +40,9 @@ class DefaultConfigBuilder(ConfigBuilderBase):
     def build_config(self):
         return Config(dataset_name='flickr8k',
                       epochs=1,
+                      time_limit=None,
                       batch_size=32,
+                      reduce_lr_factor=0.5,
                       lemmatize_caption=True,
                       rare_words_handling='nothing',
                       words_min_occur=1,
@@ -49,11 +55,11 @@ class DefaultConfigBuilder(ConfigBuilderBase):
 
 class RandomConfigBuilder(ConfigBuilderBase):
     _BATCH_SIZE = lambda: choice([16, 32, 64])
+    _REDUCE_LR_FACTOR = lambda: uniform(0.1, 0.9)
     _LEMMATIZE_CAPTION = lambda: choice([True, False])
     _RARE_WORDS_HANDLING = lambda: choice(['nothing', 'discard', 'change'])
     _WORDS_MIN_OCCUR = lambda: randint(1, 5)
     _LEARNING_RATE = lambda: 10**uniform(-4, -1)
-    _VOCAB_SIZE = lambda: None
     _EMBEDDING_SIZE = lambda: randint(50, 500)
     _LSTM_OUTPUT_SIZE = lambda: randint(50, 500)
     _DROPOUT_RATE = lambda: uniform(0, 1)
@@ -61,22 +67,26 @@ class RandomConfigBuilder(ConfigBuilderBase):
     def __init__(self, fixed_config_keys):
         """
         Args
-          fixed_config_keys: dataset_name and epochs must exist
+          fixed_config_keys: dataset_name must exist;
+                             epochs xor time_limit must exist
         """
-        if not ('dataset_name' in fixed_config_keys and
-                'epochs' in fixed_config_keys):
-            raise ValueError('fixed_config_keys must contain both dataset_name'
-                             ' and epochs!')
+        if 'dataset_name' not in fixed_config_keys:
+            raise ValueError('fixed_config_keys must contain dataset_name!')
+        if not (('epochs' in fixed_config_keys) ^
+                ('time_limit' in fixed_config_keys)):
+            raise ValueError('fixed_config_keys must contain either epochs or '
+                             'time_limit, but not both!')
         self._fixed_config_keys = fixed_config_keys
 
     def build_config(self):
         config_dict = dict(
             batch_size=self._BATCH_SIZE(),
+            reduce_lr_factor=self._REDUCE_LR_FACTOR(),
             lemmatize_caption=self._LEMMATIZE_CAPTION(),
             rare_words_handling=self._RARE_WORDS_HANDLING(),
             words_min_occur=self._WORDS_MIN_OCCUR(),
             learning_rate=self._LEARNING_RATE(),
-            vocab_size=self._VOCAB_SIZE(),
+            vocab_size=None,
             embedding_size=self._EMBEDDING_SIZE(),
             lstm_output_size=self._LSTM_OUTPUT_SIZE(),
             dropout_rate=self._DROPOUT_RATE())
@@ -93,6 +103,8 @@ class FileConfigBuilder(ConfigBuilderBase):
     def build_config(self):
         with open(self._yaml_path) as yaml_file:
             config_dict = yaml.load(yaml_file)
+
+        config_dict['time_limit'] = parse_timedelta(config_dict['time_limit'])
         return Config(**config_dict)
 
 
@@ -115,4 +127,8 @@ def init_vocab_size(vocab_size):
 
 def write_to_file(config, filepath):
     with open(filepath, 'w') as f:
-        yaml.dump(dict(config._asdict()), f, default_flow_style=False)
+        config_dict = dict(config._asdict())
+        time_limit = config_dict['time_limit']
+        if time_limit:
+            config_dict['time_limit'] = str(time_limit)
+        yaml.dump(config_dict, f, default_flow_style=False)

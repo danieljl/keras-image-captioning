@@ -14,9 +14,7 @@ from .models import ImageCaptioningModel
 class Training(object):
     def __init__(self,
                  training_label,
-                 config_=None,
-                 time_limit=None,
-                 reduce_lr_factor=0.5,
+                 conf=None,
                  reduce_lr_patience=2,
                  early_stopping_patience=3,
                  min_loss_delta=1e-4,
@@ -25,14 +23,16 @@ class Training(object):
                  verbose=1):
         """
         Args
-          time_limit: an instance of datetime.timedelta; if None, the training
-                      stops until epochs reached; if set, the training stops
-                      after it
+          conf: an instance of config.Config; its properties:
+            epochs
+            time_limit
+            reduce_lr_factor
         """
         self._training_label = training_label
-        self._config = config_ or config.DefaultConfigBuilder().build_config()
-        self._time_limit = time_limit
-        self._reduce_lr_factor = reduce_lr_factor
+        self._config = conf or config.DefaultConfigBuilder().build_config()
+        self._epochs = self._config.epochs
+        self._time_limit = self._config.time_limit
+        self._reduce_lr_factor = self._config.reduce_lr_factor
         self._reduce_lr_patience = reduce_lr_patience
         self._early_stopping_patience = early_stopping_patience
         self._min_loss_delta = min_loss_delta
@@ -40,14 +40,18 @@ class Training(object):
         self._workers = workers
         self._verbose = verbose
 
+        if not ((self._epochs is None) ^ (self._time_limit is None)):
+            raise ValueError('Either conf.epochs or conf.time_limit must be '
+                             'set, but not both!')
+
         self._activate_config_and_init_dataset_provider()
         self._init_result_dir()
         self._init_callbacks()
-        self._epochs = config.active_config().epochs
         self._model = ImageCaptioningModel()
         self._write_active_config()
 
     def run(self):
+        self._model.build()
         self._model.keras_model.fit_generator(
                 generator=self._dataset_provider.training_set(),
                 steps_per_epoch=self._dataset_provider.training_steps,

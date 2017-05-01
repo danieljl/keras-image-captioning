@@ -26,13 +26,19 @@ class ImageCaptioningModel(object):
         self._lstm_output_size = (lstm_output_size or
                                   active_config().lstm_output_size)
         self._dropout_rate = dropout_rate or active_config().dropout_rate
-        self._keras_model = self._build()
+        self._keras_model = None
 
     @property
     def keras_model(self):
+        if self._keras_model is None:
+            raise AttributeError('Execute build method first before accessing '
+                                 'keras_model!')
         return self._keras_model
 
-    def _build(self):
+    def build(self):
+        if self._keras_model:
+            return
+
         image_input, image_embedding = self._build_image_embedding()
         sentence_input, word_embedding = self._build_word_embedding()
         sequence_input = Concatenate(axis=1)([image_embedding, word_embedding])
@@ -43,7 +49,8 @@ class ImageCaptioningModel(object):
         model.compile(optimizer=Adam(lr=self._learning_rate),
                       loss=categorical_crossentropy_from_logits,
                       metrics=[categorical_accuracy_with_variable_timestep])
-        return model
+
+        self._keras_model = model
 
     def _build_image_embedding(self):
         image_model = InceptionV3(include_top=False, weights='imagenet',
