@@ -19,6 +19,7 @@ class Training(object):
                  verbose=1):
         self._training_label = training_label
         self._config = config_ or config.DefaultConfigBuilder().build_config()
+        self._early_stopping_patience = early_stopping_patience
         self._max_q_size = max_q_size
         self._workers = workers
         self._verbose = verbose
@@ -77,7 +78,7 @@ class Training(object):
 
         earling_stopping = EarlyStopping(monitor='val_loss',
                                          min_delta=0,
-                                         patience=0,
+                                         patience=self._early_stopping_patience,
                                          verbose=self._verbose)
 
         # TODO Add LearningRateScheduler and ReduceLROnPlateau
