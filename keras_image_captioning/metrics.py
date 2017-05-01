@@ -17,3 +17,7 @@ def categorical_accuracy_with_variable_timestep(y_true, y_pred):
     return tf.reduce_mean(tf.cast(tf.equal(tf.argmax(y_true, axis=1),
                                            tf.argmax(y_pred, axis=1)),
                                   dtype=tf.float32))
+
+
+# As Keras store a function's name as its metric's name
+categorical_accuracy_with_variable_timestep.__name__ = 'categorical_accuracy_wvt'
