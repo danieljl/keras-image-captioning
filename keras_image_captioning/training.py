@@ -1,7 +1,8 @@
+import numpy as np
 import os
 
-from keras.callbacks import (CSVLogger, EarlyStopping, ModelCheckpoint,
-                             TensorBoard)
+from keras.callbacks import (CSVLogger, EarlyStopping, LambdaCallback,
+                             ModelCheckpoint, ReduceLROnPlateau, TensorBoard)
 
 from . import config
 from . import io_utils
@@ -13,13 +14,19 @@ class Training(object):
     def __init__(self,
                  training_label,
                  config_=None,
-                 early_stopping_patience=2,
+                 reduce_lr_factor=0.5,
+                 reduce_lr_patience=2,
+                 early_stopping_patience=3,
+                 min_loss_delta=1e-4,
                  max_q_size=10,
                  workers=1,
                  verbose=1):
         self._training_label = training_label
         self._config = config_ or config.DefaultConfigBuilder().build_config()
+        self._reduce_lr_factor = reduce_lr_factor
+        self._reduce_lr_patience = reduce_lr_patience
         self._early_stopping_patience = early_stopping_patience
+        self._min_loss_delta = min_loss_delta
         self._max_q_size = max_q_size
         self._workers = workers
         self._verbose = verbose
@@ -58,6 +65,10 @@ class Training(object):
         io_utils.mkdir_p(self._result_dir)
 
     def _init_callbacks(self):
+        def on_epoch_end(epoch, logs):
+            logs['lr'] = np.float32(config.active_config().learning_rate)
+        init_logs = LambdaCallback(on_epoch_end=on_epoch_end)
+
         CSV_FILENAME = 'metrics_log.csv'
         self._csv_filepath = self._path_from_result_dir(CSV_FILENAME)
         csv_logger = CSVLogger(filename=self._csv_filepath)
@@ -76,17 +87,24 @@ class Training(object):
                                   histogram_freq=1,
                                   write_graph=True)
 
+        reduce_lr = ReduceLROnPlateau(monitor='val_loss',
+                                      mode='min',
+                                      epsilon=self._min_loss_delta,
+                                      factor=self._reduce_lr_factor,
+                                      patience=self._reduce_lr_patience,
+                                      verbose=self._verbose)
+
         earling_stopping = EarlyStopping(monitor='val_loss',
                                          mode='min',
-                                         min_delta=0,
+                                         min_delta=self._min_loss_delta,
                                          patience=self._early_stopping_patience,
                                          verbose=self._verbose)
 
-        # TODO Add LearningRateScheduler and ReduceLROnPlateau
+        # TODO Add LearningRateScheduler
         # TODO Add custom callbacks: StopAfterTimedelta and StopWhenFileExists
 
-        self._callbacks = [csv_logger, model_checkpoint, tensorboard,
-                           earling_stopping]
+        self._callbacks = [init_logs, csv_logger, model_checkpoint,
+                           tensorboard, reduce_lr, earling_stopping]
 
     def _write_config(self, config_):
         CONFIG_FILENAME = 'hyperparams_config.yaml'
