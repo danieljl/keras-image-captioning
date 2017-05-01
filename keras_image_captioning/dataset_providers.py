@@ -77,7 +77,7 @@ class DatasetProvider(object):
                 if len(datum_batch) >= self._batch_size:
                     yield self._preprocess_batch(datum_batch)
                     datum_batch = []
-            if not datum_batch:
+            if datum_batch:
                 yield self._preprocess_batch(datum_batch)
 
     def _preprocess_batch(self, datum_batch):
