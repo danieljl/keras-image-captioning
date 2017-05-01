@@ -2,9 +2,11 @@ futures
 h5py
 ipykernel
 keras>=2.0,<3.0
+mock
 numpy
 pillow
 pip-tools
 pytest
+pytest-mock
 pyyaml
 tensorflow>=1.0,<1.1

@@ -21,7 +21,7 @@ ipython==5.3.0            # via ipykernel
 jupyter-client==5.0.0     # via ipykernel
 jupyter-core==4.3.0       # via jupyter-client
 keras==2.0.2
-mock==2.0.0               # via tensorflow
+mock==2.0.0
 numpy==1.12.1
 olefile==0.44             # via pillow
 packaging==16.8           # via setuptools
@@ -37,6 +37,7 @@ ptyprocess==0.5.1         # via pexpect
 py==1.4.33                # via pytest
 pygments==2.2.0           # via ipython
 pyparsing==2.2.0          # via packaging
+pytest-mock==1.6.0
 pytest==3.0.7
 python-dateutil==2.6.0    # via jupyter-client
 pyyaml==3.12
