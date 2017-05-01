@@ -77,6 +77,7 @@ class Training(object):
                                   write_graph=True)
 
         earling_stopping = EarlyStopping(monitor='val_loss',
+                                         mode='min',
                                          min_delta=0,
                                          patience=self._early_stopping_patience,
                                          verbose=self._verbose)
