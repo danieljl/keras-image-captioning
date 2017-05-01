@@ -40,13 +40,14 @@ class Training(object):
         self._workers = workers
         self._verbose = verbose
 
-    def run(self):
-        self._prepare_config_and_dataset_provider()
+        self._activate_config_and_init_dataset_provider()
         self._init_result_dir()
         self._init_callbacks()
-        self._write_config(config.active_config())
         self._epochs = config.active_config().epochs
         self._model = ImageCaptioningModel()
+        self._write_active_config()
+
+    def run(self):
         self._model.keras_model.fit_generator(
                 generator=self._dataset_provider.training_set(),
                 steps_per_epoch=self._dataset_provider.training_steps,
@@ -66,7 +67,7 @@ class Training(object):
     def result_dir(self):
         return self._result_dir
 
-    def _prepare_config_and_dataset_provider(self):
+    def _activate_config_and_init_dataset_provider(self):
         config.active_config(self._config)
         self._dataset_provider = DatasetProvider()
         config.init_vocab_size(self._dataset_provider.vocab_size)
@@ -126,10 +127,10 @@ class Training(object):
                            earling_stopping,  # Must be the second last
                            stop_after]  # Must be the last
 
-    def _write_config(self, config_):
+    def _write_active_config(self):
         CONFIG_FILENAME = 'hyperparams_config.yaml'
         self._config_filepath = self._path_from_result_dir(CONFIG_FILENAME)
-        config.write_to_file(config_, self._config_filepath)
+        config.write_to_file(config.active_config(), self._config_filepath)
 
     def _path_from_result_dir(self, *paths):
         return os.path.join(self._result_dir, *paths)
