@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import signal
 
 from keras.callbacks import (CSVLogger, EarlyStopping, LambdaCallback,
                              ModelCheckpoint, ReduceLROnPlateau, TensorBoard)
@@ -48,6 +49,10 @@ class Training(object):
                 workers=self._workers,
                 callbacks=self._callbacks,
                 verbose=self._verbose)
+
+    @property
+    def keras_model(self):
+        return self._model.keras_model
 
     @property
     def result_dir(self):
@@ -101,7 +106,7 @@ class Training(object):
                                          verbose=self._verbose)
 
         # TODO Add LearningRateScheduler
-        # TODO Add custom callbacks: StopAfterTimedelta and StopWhenFileExists
+        # TODO Add custom callbacks: StopAfterTimedelta
 
         self._callbacks = [init_logs, csv_logger, model_checkpoint,
                            tensorboard, reduce_lr, earling_stopping]
@@ -117,6 +122,13 @@ class Training(object):
 
 def main():
     training = Training(training_label='training-test')
+
+    def handler(signum, frame):
+        print('Stopping training...')
+        print('(Training will stop after the current epoch)')
+        training.keras_model.stop_training = True
+    signal.signal(signal.SIGINT, handler)
+
     training.run()
 
 
