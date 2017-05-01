@@ -1,12 +1,12 @@
-import numpy as np
 import os
 import signal
 
-from keras.callbacks import (CSVLogger, EarlyStopping, LambdaCallback,
-                             ModelCheckpoint, ReduceLROnPlateau, TensorBoard)
+from keras.callbacks import (CSVLogger, EarlyStopping, ModelCheckpoint,
+                             ReduceLROnPlateau, TensorBoard)
 
 from . import config
 from . import io_utils
+from .callbacks import LogLearningRate, LogTimestamp, StopAfterTimedelta
 from .dataset_providers import DatasetProvider
 from .models import ImageCaptioningModel
 
@@ -15,6 +15,7 @@ class Training(object):
     def __init__(self,
                  training_label,
                  config_=None,
+                 time_limit=None,
                  reduce_lr_factor=0.5,
                  reduce_lr_patience=2,
                  early_stopping_patience=3,
@@ -22,8 +23,15 @@ class Training(object):
                  max_q_size=10,
                  workers=1,
                  verbose=1):
+        """
+        Args
+          time_limit: an instance of datetime.timedelta; if None, the training
+                      stops until epochs reached; if set, the training stops
+                      after it
+        """
         self._training_label = training_label
         self._config = config_ or config.DefaultConfigBuilder().build_config()
+        self._time_limit = time_limit
         self._reduce_lr_factor = reduce_lr_factor
         self._reduce_lr_patience = reduce_lr_patience
         self._early_stopping_patience = early_stopping_patience
@@ -70,9 +78,8 @@ class Training(object):
         io_utils.mkdir_p(self._result_dir)
 
     def _init_callbacks(self):
-        def on_epoch_end(epoch, logs):
-            logs['lr'] = np.float32(config.active_config().learning_rate)
-        init_logs = LambdaCallback(on_epoch_end=on_epoch_end)
+        log_lr = LogLearningRate()
+        log_ts = LogTimestamp()
 
         CSV_FILENAME = 'metrics_log.csv'
         self._csv_filepath = self._path_from_result_dir(CSV_FILENAME)
@@ -105,11 +112,19 @@ class Training(object):
                                          patience=self._early_stopping_patience,
                                          verbose=self._verbose)
 
-        # TODO Add LearningRateScheduler
-        # TODO Add custom callbacks: StopAfterTimedelta
+        stop_after = StopAfterTimedelta(timedelta=self._time_limit,
+                                        verbose=self._verbose)
 
-        self._callbacks = [init_logs, csv_logger, model_checkpoint,
-                           tensorboard, reduce_lr, earling_stopping]
+        # TODO Add LearningRateScheduler. Is it still needed?
+
+        self._callbacks = [log_lr,  # Must be before model_checkpoint
+                           model_checkpoint,
+                           tensorboard,  # Must be before log_ts
+                           log_ts,  # Must be before csv_logger
+                           csv_logger,
+                           reduce_lr,  # Must be after csv_logger
+                           earling_stopping,  # Must be the second last
+                           stop_after]  # Must be the last
 
     def _write_config(self, config_):
         CONFIG_FILENAME = 'hyperparams_config.yaml'
