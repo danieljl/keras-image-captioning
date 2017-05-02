@@ -28,6 +28,11 @@ class ImageCaptioningModel(object):
         self._dropout_rate = dropout_rate or active_config().dropout_rate
         self._keras_model = None
 
+        if self._vocab_size is None:
+            raise ValueError('config.active_config().vocab_size cannot be '
+                             'None! You should check your config or you can '
+                             'explicitly pass the vocab_size argument.')
+
     @property
     def keras_model(self):
         if self._keras_model is None:
