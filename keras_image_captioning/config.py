@@ -54,15 +54,15 @@ class DefaultConfigBuilder(ConfigBuilderBase):
 
 
 class RandomConfigBuilder(ConfigBuilderBase):
-    _BATCH_SIZE = lambda: choice([16, 32, 64])
-    _REDUCE_LR_FACTOR = lambda: uniform(0.1, 0.9)
-    _LEMMATIZE_CAPTION = lambda: choice([True, False])
-    _RARE_WORDS_HANDLING = lambda: choice(['nothing', 'discard', 'change'])
-    _WORDS_MIN_OCCUR = lambda: randint(1, 5)
-    _LEARNING_RATE = lambda: 10**uniform(-4, -1)
-    _EMBEDDING_SIZE = lambda: randint(50, 500)
-    _LSTM_OUTPUT_SIZE = lambda: randint(50, 500)
-    _DROPOUT_RATE = lambda: uniform(0, 1)
+    _BATCH_SIZE = lambda _: choice([16, 32, 64])
+    _REDUCE_LR_FACTOR = lambda _: uniform(0.1, 0.9)
+    _LEMMATIZE_CAPTION = lambda _: choice([True, False])
+    _RARE_WORDS_HANDLING = lambda _: choice(['nothing', 'discard', 'change'])
+    _WORDS_MIN_OCCUR = lambda _: randint(1, 5)
+    _LEARNING_RATE = lambda _: 10**uniform(-4, -1)
+    _EMBEDDING_SIZE = lambda _: randint(50, 500)
+    _LSTM_OUTPUT_SIZE = lambda _: randint(50, 500)
+    _DROPOUT_RATE = lambda _: uniform(0, 1)
 
     def __init__(self, fixed_config_keys):
         """
@@ -76,7 +76,10 @@ class RandomConfigBuilder(ConfigBuilderBase):
                 ('time_limit' in fixed_config_keys)):
             raise ValueError('fixed_config_keys must contain either epochs or '
                              'time_limit, but not both!')
+
         self._fixed_config_keys = fixed_config_keys
+        self._fixed_config_keys.setdefault('epochs', None)
+        self._fixed_config_keys.setdefault('time_limit', None)
 
     def build_config(self):
         config_dict = dict(
@@ -119,14 +122,17 @@ def active_config(new_active_config=None):
 
 
 def init_vocab_size(vocab_size):
+    if vocab_size is None:
+        raise ValueError('vocab_size cannot be None!')
     if _active_config.vocab_size:
         raise RuntimeError('vocab_size has been initialized before!')
+
     global _active_config
     _active_config = _active_config._replace(vocab_size=vocab_size)
 
 
-def write_to_file(config, filepath):
-    with open(filepath, 'w') as f:
+def write_to_file(config, yaml_path):
+    with open(yaml_path, 'w') as f:
         config_dict = dict(config._asdict())
         time_limit = config_dict['time_limit']
         if time_limit:
