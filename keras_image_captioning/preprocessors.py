@@ -9,7 +9,7 @@ from .config import active_config
 
 
 class ImagePreprocessor(object):
-    _IMAGE_SIZE = (299, 299)
+    IMAGE_SIZE = (299, 299)
 
     def __init__(self, image_data_generator=None):
         self._image_data_generator = image_data_generator
@@ -22,7 +22,7 @@ class ImagePreprocessor(object):
         return np.array(img_list)
 
     def _preprocess_an_image(self, img_path):
-        img = load_img(img_path, target_size=self._IMAGE_SIZE)
+        img = load_img(img_path, target_size=self.IMAGE_SIZE)
         img_array = img_to_array(img)
         img_array = inception_v3.preprocess_input(img_array)
         if self._do_random_transform:
@@ -32,8 +32,7 @@ class ImagePreprocessor(object):
 
 
 class CaptionPreprocessor(object):
-    _TOKENIZER_FILTERS = ''
-    _EOS_TOKEN = '<eos>'
+    EOS_TOKEN = 'eos'
 
     def __init__(self, rare_words_handling=None, words_min_occur=None):
         """
@@ -43,7 +42,7 @@ class CaptionPreprocessor(object):
           words_min_occur: words whose occurrences are less than this are
                            considered rare words
         """
-        self._tokenizer = Tokenizer(filters=self._TOKENIZER_FILTERS)
+        self._tokenizer = Tokenizer()
         self._rare_words_handling = (rare_words_handling or
                                      active_config().rare_words_handling)
         self._words_min_occur = (words_min_occur or
@@ -53,40 +52,42 @@ class CaptionPreprocessor(object):
     def vocab_size(self):
         return len(self._tokenizer.word_index)
 
-    def fit_on_captions(self, captions):
-        captions = self._add_eos(captions)
+    def fit_on_captions(self, captions_txt):
+        captions_txt = self._add_eos(captions_txt)
         # TODO Handle rare words
-        self._tokenizer.fit_on_texts(captions)
+        self._tokenizer.fit_on_texts(captions_txt)
 
     def encode_captions(self, captions_txt):
+        captions_txt = self._add_eos(captions_txt)
         return self._tokenizer.texts_to_sequences(captions_txt)
 
     def decode_captions(self, captions_encoded):
         # TODO
         raise NotImplementedError
 
-    def preprocess_batch(self, caption_list):
-        captions = keras_seq.pad_sequences(caption_list, padding='post')
+    def preprocess_batch(self, captions_label_encoded):
+        captions = keras_seq.pad_sequences(captions_label_encoded,
+                                           padding='post')
         # Because the number of timesteps/words resulted by the model is
         # maxlen(captions) + 1 (because the first "word" is the image).
         captions_extended1 = keras_seq.pad_sequences(captions,
-                                       maxlen=captions.shape[-1] + 1,
-                                       padding='post')
-        captions_encoded = map(self._tokenizer.sequences_to_matrix,
+                                                maxlen=captions.shape[-1] + 1,
+                                                padding='post')
+        captions_one_hot = map(self._tokenizer.sequences_to_matrix,
                                np.expand_dims(captions_extended1, -1))
-        captions_encoded = np.array(captions_encoded, dtype='int')
+        captions_one_hot = np.array(captions_one_hot, dtype='int')
 
         # Decrease/shift word index by 1.
-        # Shifting `captions_encoded` makes the padding word
+        # Shifting `captions_one_hot` makes the padding word
         # (index=0, encoded=[1, 0, ...]) encoded all zeros ([0, 0, ...]),
         # so its cross entropy loss will be zero.
         captions_decreased = captions.copy()
         captions_decreased[captions_decreased > 0] -= 1
-        captions_encoded_shifted = captions_encoded[:, :, 1:]
+        captions_one_hot_shifted = captions_one_hot[:, :, 1:]
 
         captions_input = captions_decreased
-        captions_output = captions_encoded_shifted
+        captions_output = captions_one_hot_shifted
         return captions_input, captions_output
 
     def _add_eos(self, captions):
-        return map(lambda x: x + ' ' + self._EOS_TOKEN, captions)
+        return map(lambda x: x + ' ' + self.EOS_TOKEN, captions)
