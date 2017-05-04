@@ -72,8 +72,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
         """
         if 'dataset_name' not in fixed_config_keys:
             raise ValueError('fixed_config_keys must contain dataset_name!')
-        if not (('epochs' in fixed_config_keys) ^
-                ('time_limit' in fixed_config_keys)):
+        if not (bool(fixed_config_keys.get('epochs')) ^
+                bool(fixed_config_keys.get('time_limit'))):
             raise ValueError('fixed_config_keys must contain either epochs or '
                              'time_limit, but not both!')
 
