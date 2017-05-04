@@ -43,6 +43,7 @@ pyyaml==3.12
 pyzmq==16.0.2             # via jupyter-client
 scandir==1.5              # via pathlib2
 scipy==0.19.0             # via theano
+sh==1.12.13
 simplegeneric==0.8.1      # via ipython
 singledispatch==3.4.0.3   # via tornado
 six==1.10.0               # via fire, h5py, keras, mock, pathlib2, pip-tools, prompt-toolkit, protobuf, python-dateutil, singledispatch, tensorflow, theano, traitlets

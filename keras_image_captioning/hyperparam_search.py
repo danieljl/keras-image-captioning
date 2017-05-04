@@ -1,0 +1,169 @@
+import fire
+import itertools
+import os
+import signal
+import sh
+import sys
+import traceback
+
+from threading import Semaphore
+from tempfile import gettempdir, NamedTemporaryFile
+
+from .config import active_config, write_to_file, RandomConfigBuilder
+from .common_utils import parse_timedelta
+from .datasets import get_dataset_instance
+from .io_utils import mkdir_p, print_flush
+
+
+class HyperparamSearch(object):
+    def __init__(self,
+                 training_label_prefix,
+                 dataset_name=None,
+                 epochs=None,
+                 time_limit=None):
+        if not ((epochs is None) ^ (time_limit is None)):
+            raise ValueError('epochs or time_limit must present, '
+                             'but not both!')
+
+        self._training_label_prefix = training_label_prefix
+        self._dataset_name = dataset_name or active_config().dataset_name
+        self._epochs = epochs
+        self._time_limit = time_limit
+        fixed_config_keys = dict(dataset_name=self._dataset_name,
+                                 epochs=self._epochs,
+                                 time_limit=self._time_limit)
+        self._config_builder = RandomConfigBuilder(fixed_config_keys)
+        try:
+            self._num_gpus = len(sh.nvidia_smi('-L').split('\n')) - 1
+        except sh.CommandNotFound:
+            self._num_gpus = 1
+        self._available_gpus = set(range(self.num_gpus))
+        self._semaphore = Semaphore(self.num_gpus)
+        self._command_history = []
+        self._running_history = []
+
+    @property
+    def training_label_prefix(self):
+        return self._training_label_prefix
+
+    @property
+    def num_gpus(self):
+        return self._num_gpus
+
+    @property
+    def running_history(self):
+        return self._running_history
+
+    def run(self):
+        for search_index in itertools.count():
+            self._semaphore.acquire()
+            training_label = '{}/{:04d}'.format(self.training_label_prefix,
+                                                search_index)
+            config = self._config_builder.build_config()
+            gpu_index = self._available_gpus.pop()
+            done_callback = self._create_done_callback(gpu_index)
+            command = TrainingCommand(training_label=training_label,
+                                      config=config,
+                                      gpu_index=gpu_index,
+                                      background=True,
+                                      done_callback=done_callback)
+            self._command_history.append(command)
+            self._running_history.append(command.execute())
+
+    def _create_done_callback(self, gpu_index):
+        def done_callback(cmd, success, exit_code):
+            self._available_gpus.add(gpu_index)
+            self._semaphore.release()
+        return done_callback
+
+
+class TrainingCommand(object):
+    COMMAND = sh.python.bake('-m', 'keras_image_captioning.training')
+
+    def __init__(self,
+                 training_label,
+                 config,
+                 gpu_index,
+                 background=False,
+                 done_callback=None):
+        self._training_label = training_label
+        self._config = config
+        self._gpu_index = gpu_index
+        self._background = background
+        if done_callback is not None:
+            self._done_callback = done_callback
+        else:
+            self._done_callback = lambda cmd, success, exit_code: None
+        self._init_config_filepath()
+        self._init_log_filepath()
+
+    @property
+    def training_label(self):
+        return self._training_label
+
+    @property
+    def config(self):
+        return self._config
+
+    @property
+    def gpu_index(self):
+        return self._gpu_index
+
+    @property
+    def config_filepath(self):
+        return self._config_filepath
+
+    def execute(self):
+        env = os.environ.copy()
+        env['CUDA_VISIBLE_DEVICES'] = str(self.gpu_index)
+        return self.COMMAND(training_label=self.training_label,
+                            config_file=self.config_filepath,
+                            _env=env,
+                            _out=self._log_filepath,
+                            _err_to_out=True,
+                            _bg=self._background,
+                            _done=self._done_callback)
+
+    def _init_config_filepath(self):
+        tmp_dir = os.path.join(gettempdir(), 'keras_image_captioning')
+        mkdir_p(tmp_dir)
+        config_file = NamedTemporaryFile(suffix='.yaml', dir=tmp_dir,
+                                         delete=False)
+        config_file.close()
+        self._config_filepath = config_file.name
+        write_to_file(self._config, self._config_filepath)
+
+    def _init_log_filepath(self):
+        LOG_FILENAME = 'training_log.txt'
+        dataset = get_dataset_instance(self._config.dataset_name,
+                                       self._config.lemmatize_caption)
+        result_dir = os.path.join(dataset.training_results_dir,
+                                  self._training_label)
+        mkdir_p(result_dir)
+        self._log_filepath = os.path.join(result_dir, LOG_FILENAME)
+
+
+def main(training_label_prefix,
+         dataset_name=None,
+         epochs=None,
+         time_limit=None):
+    epochs = int(epochs) if epochs else None
+    time_limit = parse_timedelta(time_limit) if time_limit else None
+    search = HyperparamSearch(dataset_name, epochs, time_limit)
+
+    def handler(signum, frame):
+        print_flush('Stopping hyperparam search...')
+        print_flush('Sending SIGINT to every training process...')
+        for running_command in search.running_history:
+            try:
+                running_command.process.signal(signal.SIGINT)
+            except:
+                traceback.print_exc(file=sys.stdout)
+        print_flush('SIGINTs are sent.')
+    signal.signal(signal.SIGINT, handler)
+
+    search.run()
+
+
+if __name__ == '__main__':
+    fire.Fire(main)

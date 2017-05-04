@@ -10,4 +10,5 @@ pip-tools
 pytest
 pytest-mock
 pyyaml
+sh
 tensorflow>=1.0,<1.1
