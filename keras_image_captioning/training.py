@@ -1,3 +1,4 @@
+import fire
 import os
 import signal
 
@@ -140,8 +141,18 @@ class Training(object):
         return os.path.join(self._result_dir, *paths)
 
 
-def main():
-    training = Training(training_label='training-test')
+def main(training_label, config_file=None, **kwargs):
+    if 'conf' in kwargs:
+        raise ValueError('conf must not be passed directly! '
+                         'Use config_file instead.')
+
+    unit_test = kwargs.pop('unit_test', False)
+
+    if config_file is not None:
+        config_builder = config.FileConfigBuilder(config_file)
+        kwargs['conf'] = config_builder.build_config()
+
+    training = Training(training_label, **kwargs)
 
     def handler(signum, frame):
         print('Stopping training...')
@@ -151,6 +162,9 @@ def main():
 
     training.run()
 
+    if unit_test:
+        return training
+
 
 if __name__ == '__main__':
-    main()
+    fire.Fire(main)
