@@ -13,3 +13,7 @@ def test_read_text_file():
     lines_generator = io_utils.read_text_file('/proc/cpuinfo')
     lines = list(lines_generator)
     assert len(lines) > 0
+
+
+def test_print_flush():
+    io_utils.print_flush('foo bar')

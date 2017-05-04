@@ -2,6 +2,8 @@ from datetime import datetime
 from keras import backend as K
 from keras.callbacks import Callback
 
+from .io_utils import print_flush
+
 
 class LogLearningRate(Callback):
     def on_epoch_end(self, epoch, logs):
@@ -47,5 +49,5 @@ class StopAfterTimedelta(Callback):
 
     def on_train_end(self, logs):
         if self._stopped_epoch is not None and self._verbose > 0:
-            print('Epoch {}: stop after {}'.format(self._stopped_epoch,
-                                                   self._timedelta))
+            print_flush('Epoch {}: stop after {}'.format(self._stopped_epoch,
+                                                         self._timedelta))

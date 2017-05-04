@@ -1,5 +1,8 @@
+from __future__ import print_function
+
 import errno
 import os
+import sys
 
 
 def _path_from_here(path):
@@ -27,3 +30,8 @@ def read_text_file(path):
     with open(path) as f:
         for line in f:
             yield line.strip()
+
+
+def print_flush(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
