@@ -98,6 +98,7 @@ class Training(object):
                                            monitor='val_loss',
                                            mode='min',
                                            save_best_only=True,
+                                           save_weights_only=True,
                                            period=1,
                                            verbose=self._verbose)
 
