@@ -10,8 +10,12 @@ def parse_timedelta(timedelta_str):
 
     tokens = re.split(r' days?,? ', timedelta_str)
     if len(tokens) == 1:
-        days = '0'
-        rest = tokens[0]
+        if tokens[0].find('day') == -1:
+            days = '0'
+            rest = tokens[0]
+        else:
+            days = tokens[0].split(' ')[0]
+            rest = '00:00:00'
     else:
         days, rest = tokens
 

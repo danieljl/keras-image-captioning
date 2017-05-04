@@ -14,6 +14,12 @@ def test_parse_timedelta_with_no_day():
     assert timedelta_obj == timedelta(minutes=30)
 
 
+def test_parse_timedelta_with_only_day():
+    timedelta_str = '1 day'
+    timedelta_obj = common_utils.parse_timedelta(timedelta_str)
+    assert timedelta_obj == timedelta(days=1)
+
+
 def test_flatten_list_2d():
     list_2d = [[1, 2], [3]]
     assert common_utils.flatten_list_2d(list_2d) == [1, 2, 3]
