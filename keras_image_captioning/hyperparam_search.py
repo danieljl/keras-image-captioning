@@ -6,7 +6,8 @@ import sh
 import sys
 import traceback
 
-from threading import Semaphore
+from concurrent.futures import ThreadPoolExecutor
+from threading import Lock, Semaphore
 from tempfile import gettempdir, NamedTemporaryFile
 
 from .config import active_config, write_to_file, RandomConfigBuilder
@@ -37,10 +38,13 @@ class HyperparamSearch(object):
             self._num_gpus = len(sh.nvidia_smi('-L').split('\n')) - 1
         except sh.CommandNotFound:
             self._num_gpus = 1
+        # TODO ! Replace set with a thread-safe set
         self._available_gpus = set(range(self.num_gpus))
         self._semaphore = Semaphore(self.num_gpus)
         self._command_history = []
         self._running_history = []
+        self._stop_search = False
+        self._lock = Lock()
 
     @property
     def training_label_prefix(self):
@@ -54,21 +58,44 @@ class HyperparamSearch(object):
     def running_history(self):
         return self._running_history
 
+    @property
+    def lock(self):
+        return self._lock
+
     def run(self):
+        self._stop_search = False
         for search_index in itertools.count():
             self._semaphore.acquire()
-            training_label = '{}/{:04d}'.format(self.training_label_prefix,
-                                                search_index)
-            config = self._config_builder.build_config()
-            gpu_index = self._available_gpus.pop()
-            done_callback = self._create_done_callback(gpu_index)
-            command = TrainingCommand(training_label=training_label,
-                                      config=config,
-                                      gpu_index=gpu_index,
-                                      background=True,
-                                      done_callback=done_callback)
-            self._command_history.append(command)
-            self._running_history.append(command.execute())
+
+            with self.lock:
+                if self._stop_search:
+                    break
+                training_label = self.training_label(search_index)
+                config = self._config_builder.build_config()
+                gpu_index = self._available_gpus.pop()
+                done_callback = self._create_done_callback(gpu_index)
+                command = TrainingCommand(training_label=training_label,
+                                          config=config,
+                                          gpu_index=gpu_index,
+                                          background=True,
+                                          done_callback=done_callback)
+                self._command_history.append(command)
+                self.running_history.append(command.execute())
+                print_flush('Running training label {}..'.format(training_label))
+
+        for search_index, running_command in enumerate(self.running_history):
+            training_label = self.training_label(search_index)
+            print_flush('Waiting {} to finish..'.format(training_label))
+            try:
+                running_command.wait()
+            except sh.ErrorReturnCode as e:
+                print_flush('{} returned a non-zero code!'.format(training_label))
+
+    def stop(self):
+        self._stop_search = True
+
+    def training_label(self, search_index):
+        return '{}/{:04d}'.format(self.training_label_prefix, search_index)
 
     def _create_done_callback(self, gpu_index):
         def done_callback(cmd, success, exit_code):
@@ -149,20 +176,36 @@ def main(training_label_prefix,
          time_limit=None):
     epochs = int(epochs) if epochs else None
     time_limit = parse_timedelta(time_limit) if time_limit else None
-    search = HyperparamSearch(dataset_name, epochs, time_limit)
+    search = HyperparamSearch(training_label_prefix=training_label_prefix,
+                              dataset_name=dataset_name,
+                              epochs=epochs,
+                              time_limit=time_limit)
 
     def handler(signum, frame):
-        print_flush('Stopping hyperparam search...')
-        print_flush('Sending SIGINT to every training process...')
-        for running_command in search.running_history:
-            try:
-                running_command.process.signal(signal.SIGINT)
-            except:
-                traceback.print_exc(file=sys.stdout)
-        print_flush('SIGINTs are sent.')
+        print_flush('Stopping hyperparam search..')
+        with search.lock:
+            search.stop()
+            for index, running_command in enumerate(search.running_history):
+                try:
+                    label = search.training_label(index)
+                    print_flush('Sending SIGINT to {}..'.format(label))
+                    running_command.signal(signal.SIGINT)
+                except OSError:  # The process might have exited before
+                    print_flush('{} might have exited before.'.format(label))
+                except:
+                    traceback.print_exc(file=sys.stderr)
+            print_flush('All training processes have been sent SIGINT.')
     signal.signal(signal.SIGINT, handler)
 
-    search.run()
+    # We need to execute search.run() in another thread in order for Semaphore
+    # inside it doesn't block the signal handler. Otherwise, the signal handler
+    # will be executed after any training process finishes the whole epoch.
+
+    executor = ThreadPoolExecutor(max_workers=1)
+    executor.submit(search.run)
+    # wait must be True in order for the mock works,
+    # see the unit test for more details
+    executor.shutdown(wait=True)
 
 
 if __name__ == '__main__':
