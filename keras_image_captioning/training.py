@@ -20,7 +20,7 @@ class Training(object):
                  training_label,
                  conf=None,
                  reduce_lr_patience=2,
-                 early_stopping_patience=3,
+                 early_stopping_patience=4,
                  min_loss_delta=1e-4,
                  max_q_size=10,
                  workers=1,
