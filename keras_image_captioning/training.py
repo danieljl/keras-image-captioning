@@ -117,7 +117,7 @@ class Training(object):
         self._csv_filepath = self._path_from_result_dir(CSV_FILENAME)
         csv_logger = CSVLogger(filename=self._csv_filepath)
 
-        CHECKPOINT_FILENAME = 'model-checkpoint.hdf5'
+        CHECKPOINT_FILENAME = 'model-weights.hdf5'
         self._checkpoint_filepath = self._path_from_result_dir(
                                                         CHECKPOINT_FILENAME)
         model_checkpoint = ModelCheckpoint(filepath=self._checkpoint_filepath,

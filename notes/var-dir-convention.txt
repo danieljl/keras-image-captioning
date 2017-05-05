@@ -5,7 +5,7 @@ var
             Flickr8k_text
         training-results
             0001
-                model-checkpoint.hdf5
+                model-weights.hdf5
                 events.out.tfevents.*
                 hyperparams_config.yaml
                 metrics_log.csv
