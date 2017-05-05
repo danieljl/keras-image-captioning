@@ -42,3 +42,8 @@ class TestImageCaptioningModel(object):
         model._bidirectional_rnn = not model._bidirectional_rnn
         model.build()
         assert isinstance(model.keras_model, keras.models.Model)
+
+    def test_arg_rnn_type(self, model):
+        model._rnn_type = 'gru' if model._rnn_type == 'lstm' else 'lstm'
+        model.build()
+        assert isinstance(model.keras_model, keras.models.Model)

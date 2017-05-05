@@ -1,6 +1,6 @@
 from keras.applications.inception_v3 import InceptionV3
 from keras.models import Model
-from keras.layers import (Dense, Embedding, Input, LSTM, RepeatVector,
+from keras.layers import (Dense, Embedding, GRU, Input, LSTM, RepeatVector,
                           TimeDistributed)
 from keras.layers.merge import Concatenate
 from keras.layers.wrappers import Bidirectional
@@ -18,7 +18,8 @@ class ImageCaptioningModel(object):
                  embedding_size=None,
                  lstm_output_size=None,
                  dropout_rate=None,
-                 bidirectional_rnn=None):
+                 bidirectional_rnn=None,
+                 rnn_type=None):
         """
         If an arg is None, it will get its value from config.active_config.
         """
@@ -28,6 +29,7 @@ class ImageCaptioningModel(object):
         self._lstm_output_size = (lstm_output_size or
                                   active_config().lstm_output_size)
         self._dropout_rate = dropout_rate or active_config().dropout_rate
+        self._rnn_type = rnn_type or active_config().rnn_type
 
         if bidirectional_rnn is None:
             self._bidirectional_rnn = active_config().bidirectional_rnn
@@ -40,6 +42,9 @@ class ImageCaptioningModel(object):
             raise ValueError('config.active_config().vocab_size cannot be '
                              'None! You should check your config or you can '
                              'explicitly pass the vocab_size argument.')
+
+        if self._rnn_type not in ('lstm', 'gru'):
+            raise ValueError('rnn_type must be either "lstm" or "gru"!')
 
     @property
     def keras_model(self):
@@ -85,14 +90,15 @@ class ImageCaptioningModel(object):
         return sentence_input, word_embedding
 
     def _build_sequence_model(self, sequence_input):
-        lstm = LSTM(units=self._lstm_output_size,
-                    return_sequences=True,
-                    dropout=self._dropout_rate,
-                    recurrent_dropout=self._dropout_rate,
-                    implementation=2)
+        RNN = GRU if self._rnn_type == 'gru' else LSTM
+        rnn = RNN(units=self._lstm_output_size,
+                  return_sequences=True,
+                  dropout=self._dropout_rate,
+                  recurrent_dropout=self._dropout_rate,
+                  implementation=2)
 
-        lstm = Bidirectional(lstm) if self._bidirectional_rnn else lstm
-        lstm = lstm(sequence_input)
-        time_dist_dense = TimeDistributed(Dense(units=self._vocab_size))(lstm)
+        rnn = Bidirectional(rnn) if self._bidirectional_rnn else rnn
+        rnn = rnn(sequence_input)
+        time_dist_dense = TimeDistributed(Dense(units=self._vocab_size))(rnn)
 
         return time_dist_dense
