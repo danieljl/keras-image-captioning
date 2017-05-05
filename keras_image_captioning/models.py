@@ -16,7 +16,7 @@ class ImageCaptioningModel(object):
                  learning_rate=None,
                  vocab_size=None,
                  embedding_size=None,
-                 lstm_output_size=None,
+                 rnn_output_size=None,
                  dropout_rate=None,
                  bidirectional_rnn=None,
                  rnn_type=None):
@@ -26,8 +26,8 @@ class ImageCaptioningModel(object):
         self._learning_rate = learning_rate or active_config().learning_rate
         self._vocab_size = vocab_size or active_config().vocab_size
         self._embedding_size = embedding_size or active_config().embedding_size
-        self._lstm_output_size = (lstm_output_size or
-                                  active_config().lstm_output_size)
+        self._rnn_output_size = (rnn_output_size or
+                                 active_config().rnn_output_size)
         self._dropout_rate = dropout_rate or active_config().dropout_rate
         self._rnn_type = rnn_type or active_config().rnn_type
 
@@ -91,7 +91,7 @@ class ImageCaptioningModel(object):
 
     def _build_sequence_model(self, sequence_input):
         RNN = GRU if self._rnn_type == 'gru' else LSTM
-        rnn = RNN(units=self._lstm_output_size,
+        rnn = RNN(units=self._rnn_output_size,
                   return_sequences=True,
                   dropout=self._dropout_rate,
                   recurrent_dropout=self._dropout_rate,

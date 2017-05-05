@@ -13,7 +13,7 @@ class TestImageCaptioningModel(object):
         return ImageCaptioningModel(learning_rate=0.01,
                                     vocab_size=50,
                                     embedding_size=10,
-                                    lstm_output_size=5,
+                                    rnn_output_size=5,
                                     dropout_rate=0.)
 
     def test_with_args_from_config(self, mocker):

@@ -20,7 +20,7 @@ Config = namedtuple('Config', '''
     learning_rate
     vocab_size
     embedding_size
-    lstm_output_size
+    rnn_output_size
     dropout_rate
 
     bidirectional_rnn
@@ -54,7 +54,7 @@ class DefaultConfigBuilder(ConfigBuilderBase):
                       learning_rate=0.001,
                       vocab_size=None,
                       embedding_size=300,
-                      lstm_output_size=256,
+                      rnn_output_size=256,
                       dropout_rate=0.3,
                       bidirectional_rnn=False,
                       rnn_type='lstm')
@@ -68,7 +68,7 @@ class RandomConfigBuilder(ConfigBuilderBase):
     _WORDS_MIN_OCCUR = lambda _: randint(1, 5)
     _LEARNING_RATE = lambda _: 10**uniform(-4, -1)
     _EMBEDDING_SIZE = lambda _: randint(50, 500)
-    _LSTM_OUTPUT_SIZE = lambda _: randint(50, 500)
+    _RNN_OUTPUT_SIZE = lambda _: randint(50, 500)
     _DROPOUT_RATE = lambda _: uniform(0.1, 0.9)
     _BIDIRECTIONAL_RNN = lambda _: choice([True, False])
     _RNN_TYPE = lambda _: choice(['lstm', 'gru'])
@@ -100,7 +100,7 @@ class RandomConfigBuilder(ConfigBuilderBase):
             learning_rate=self._LEARNING_RATE(),
             vocab_size=None,
             embedding_size=self._EMBEDDING_SIZE(),
-            lstm_output_size=self._LSTM_OUTPUT_SIZE(),
+            rnn_output_size=self._RNN_OUTPUT_SIZE(),
             dropout_rate=self._DROPOUT_RATE(),
             bidirectional_rnn=self._BIDIRECTIONAL_RNN(),
             rnn_type=self._RNN_TYPE())
