@@ -28,7 +28,7 @@ class TestHyperparamSearch(object):
                             mocker.PropertyMock(return_value=NUM_GPUS))
         mocker.patch.object(itertools, 'count', lambda: range(NUM_SEARCHES))
 
-        search = HyperparamSearch(training_label_prefix='hpsearch-test/search',
+        search = HyperparamSearch(training_label_prefix='test/hpsearch/search',
                                   dataset_name='flickr8k',
                                   epochs=EPOCHS)
         search.run()
@@ -38,7 +38,7 @@ class TestHyperparamSearch(object):
 class TestTrainingCommand(object):
     @pytest.fixture
     def training_command(self):
-        return TrainingCommand(training_label='hpsearch-test/training-command',
+        return TrainingCommand(training_label='test/hpsearch/training-command',
                                config=active_config(),
                                gpu_index=0,
                                background=True)
@@ -88,5 +88,5 @@ def test_main(mocker):
     # will be broken. It works only for a few miliseconds, but then poof! The
     # object is restored to the original. If wait=True, the mock will work
     # perfectly.
-    main(training_label_prefix='hpsearch-test/main', dataset_name='flickr8k',
+    main(training_label_prefix='test/hpsearch/main', dataset_name='flickr8k',
          epochs=EPOCHS)

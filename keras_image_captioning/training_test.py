@@ -7,23 +7,26 @@ from . import config
 from . import training
 
 
+TRAINING_LABEL = 'test/training'
+
+
 class TestTraining(object):
     def test___init__(self):
         conf = config.DefaultConfigBuilder().build_config()
 
         conf = conf._replace(epochs=None, time_limit=None)
         with pytest.raises(ValueError):
-            training.Training('training-test', conf=conf)
+            training.Training(TRAINING_LABEL, conf=conf)
 
         conf = conf._replace(epochs=2, time_limit=timedelta(minutes=2))
         with pytest.raises(ValueError):
-            training.Training('training-test', conf=conf)
+            training.Training(TRAINING_LABEL, conf=conf)
 
         conf = conf._replace(epochs=2, time_limit=None)
-        training.Training('training-test', conf=conf)
+        training.Training(TRAINING_LABEL, conf=conf)
 
         conf = conf._replace(epochs=None, time_limit=timedelta(minutes=2))
-        train = training.Training('training-test', conf=conf)
+        train = training.Training(TRAINING_LABEL, conf=conf)
         assert train._epochs == sys.maxsize
 
     def test_run(self, mocker):
@@ -34,13 +37,13 @@ class TestTraining(object):
 
         conf = config.DefaultConfigBuilder().build_config()
         conf = conf._replace(epochs=2, batch_size=2)
-        train = training.Training('training-test', conf=conf)
+        train = training.Training(TRAINING_LABEL, conf=conf)
         train.run()
 
 
 def test_main(mocker):
     with pytest.raises(ValueError):
-        training.main(training_label='training-test', conf='foo')
+        training.main(training_label=TRAINING_LABEL, conf='foo')
 
     mocker.patch.object(training.Training, 'run', lambda _: None)
 
@@ -49,7 +52,7 @@ def test_main(mocker):
     conf = conf._replace(epochs=None, time_limit=timedelta(minutes=2))
     config.write_to_file(conf, yaml_path)
 
-    train = training.main(training_label='training-test',
+    train = training.main(training_label=TRAINING_LABEL,
                           config_file=yaml_path,
                           unit_test=True)
     assert train._config == conf
