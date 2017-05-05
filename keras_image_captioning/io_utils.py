@@ -4,6 +4,8 @@ import errno
 import os
 import sys
 
+from datetime import datetime
+
 
 def _path_from_here(path):
     return os.path.join(os.path.dirname(__file__), path)
@@ -34,4 +36,10 @@ def read_text_file(path):
 
 def print_flush(*args, **kwargs):
     print(*args, **kwargs)
+    sys.stdout.flush()
+
+
+def logging(*args, **kwargs):
+    utc_now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    print(utc_now, '|', *args, **kwargs)
     sys.stdout.flush()

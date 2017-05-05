@@ -13,7 +13,7 @@ from tempfile import gettempdir, NamedTemporaryFile
 from .config import active_config, write_to_file, RandomConfigBuilder
 from .common_utils import parse_timedelta
 from .datasets import get_dataset_instance
-from .io_utils import mkdir_p, print_flush
+from .io_utils import mkdir_p, logging
 
 
 class HyperparamSearch(object):
@@ -81,15 +81,15 @@ class HyperparamSearch(object):
                                           done_callback=done_callback)
                 self._command_history.append(command)
                 self.running_history.append(command.execute())
-                print_flush('Running training label {}..'.format(training_label))
+                logging('Running training label {}..'.format(training_label))
 
         for search_index, running_command in enumerate(self.running_history):
             training_label = self.training_label(search_index)
-            print_flush('Waiting {} to finish..'.format(training_label))
+            logging('Waiting {} to finish..'.format(training_label))
             try:
                 running_command.wait()
             except sh.ErrorReturnCode as e:
-                print_flush('{} returned a non-zero code!'.format(training_label))
+                logging('{} returned a non-zero code!'.format(training_label))
 
     def stop(self):
         self._stop_search = True
@@ -182,19 +182,19 @@ def main(training_label_prefix,
                               time_limit=time_limit)
 
     def handler(signum, frame):
-        print_flush('Stopping hyperparam search..')
+        logging('Stopping hyperparam search..')
         with search.lock:
             search.stop()
             for index, running_command in enumerate(search.running_history):
                 try:
                     label = search.training_label(index)
-                    print_flush('Sending SIGINT to {}..'.format(label))
+                    logging('Sending SIGINT to {}..'.format(label))
                     running_command.signal(signal.SIGINT)
                 except OSError:  # The process might have exited before
-                    print_flush('{} might have exited before.'.format(label))
+                    logging('{} might have exited before.'.format(label))
                 except:
                     traceback.print_exc(file=sys.stderr)
-            print_flush('All training processes have been sent SIGINT.')
+            logging('All training processes have been sent SIGINT.')
     signal.signal(signal.SIGINT, handler)
 
     # We need to execute search.run() in another thread in order for Semaphore

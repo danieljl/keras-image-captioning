@@ -10,7 +10,7 @@ from keras.callbacks import (CSVLogger, EarlyStopping, ModelCheckpoint,
 from . import config
 from . import io_utils
 from .callbacks import LogLearningRate, LogTimestamp, StopAfterTimedelta
-from .io_utils import print_flush
+from .io_utils import logging
 from .dataset_providers import DatasetProvider
 from .models import ImageCaptioningModel
 
@@ -182,8 +182,8 @@ def main(training_label, config_file=None, **kwargs):
     training = Training(training_label, **kwargs)
 
     def handler(signum, frame):
-        print_flush('Stopping training..')
-        print_flush('(Training will stop after the current epoch)')
+        logging('Stopping training..')
+        logging('(Training will stop after the current epoch)')
         try:
             training.stop_training()
         except:

@@ -17,3 +17,7 @@ def test_read_text_file():
 
 def test_print_flush():
     io_utils.print_flush('foo bar')
+
+
+def test_logging():
+    io_utils.logging('foo bar')
