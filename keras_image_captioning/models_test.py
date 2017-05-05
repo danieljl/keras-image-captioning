@@ -1,6 +1,8 @@
 import keras
 import pytest
 
+from keras.regularizers import l1_l2
+
 from . import config
 from .models import ImageCaptioningModel
 
@@ -56,5 +58,10 @@ class TestImageCaptioningModel(object):
     def test_arg_rnn_layers_and_rnn_type(self, model):
         model._rnn_type = 'gru' if model._rnn_type == 'lstm' else 'lstm'
         model._rnn_layers = 2 if model._rnn_layers == 1 else 1
+        model.build()
+        assert isinstance(model.keras_model, keras.models.Model)
+
+    def test_arg_l1_reg_and_l2_reg(self, model):
+        model._regularizer = l1_l2(0.01, 0.01)
         model.build()
         assert isinstance(model.keras_model, keras.models.Model)

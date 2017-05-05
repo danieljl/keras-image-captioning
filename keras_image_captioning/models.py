@@ -5,6 +5,7 @@ from keras.layers import (Dense, Embedding, GRU, Input, LSTM, RepeatVector,
 from keras.layers.merge import Concatenate
 from keras.layers.wrappers import Bidirectional
 from keras.optimizers import Adam
+from keras.regularizers import l1_l2
 
 from .config import active_config
 from .losses import categorical_crossentropy_from_logits
@@ -20,7 +21,9 @@ class ImageCaptioningModel(object):
                  dropout_rate=None,
                  bidirectional_rnn=None,
                  rnn_type=None,
-                 rnn_layers=None):
+                 rnn_layers=None,
+                 l1_reg=None,
+                 l2_reg=None):
         """
         If an arg is None, it will get its value from config.active_config.
         """
@@ -37,6 +40,10 @@ class ImageCaptioningModel(object):
             self._bidirectional_rnn = active_config().bidirectional_rnn
         else:
             self._bidirectional_rnn = bidirectional_rnn
+
+        l1_reg = l1_reg or active_config().l1_reg
+        l2_reg = l2_reg or active_config().l2_reg
+        self._regularizer = l1_l2(l1_reg, l2_reg)
 
         self._keras_model = None
 
@@ -81,7 +88,11 @@ class ImageCaptioningModel(object):
         for layer in image_model.layers:
             layer.trainable = False
 
-        image_dense = Dense(units=self._embedding_size)(image_model.output)
+        image_dense = Dense(units=self._embedding_size,
+                            kernel_regularizer=self._regularizer,
+                            bias_regularizer=self._regularizer,
+                            activity_regularizer=self._regularizer
+                            )(image_model.output)
         # Add timestep dimension
         image_embedding = RepeatVector(1)(image_dense)
 
@@ -90,8 +101,11 @@ class ImageCaptioningModel(object):
 
     def _build_word_embedding(self):
         sentence_input = Input(shape=[None])
-        word_embedding = Embedding(input_dim=self._vocab_size,
-                            output_dim=self._embedding_size)(sentence_input)
+        word_embedding = Embedding(
+                            input_dim=self._vocab_size,
+                            output_dim=self._embedding_size,
+                            embeddings_regularizer=self._regularizer
+                         )(sentence_input)
         return sentence_input, word_embedding
 
     def _build_sequence_model(self, sequence_input):
@@ -102,6 +116,10 @@ class ImageCaptioningModel(object):
                       return_sequences=True,
                       dropout=self._dropout_rate,
                       recurrent_dropout=self._dropout_rate,
+                      kernel_regularizer=self._regularizer,
+                      recurrent_regularizer=self._regularizer,
+                      bias_regularizer=self._regularizer,
+                      activity_regularizer=self._regularizer,
                       implementation=2)
             rnn = Bidirectional(rnn) if self._bidirectional_rnn else rnn
             return rnn
