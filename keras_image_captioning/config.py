@@ -62,7 +62,7 @@ class RandomConfigBuilder(ConfigBuilderBase):
     _LEARNING_RATE = lambda _: 10**uniform(-4, -1)
     _EMBEDDING_SIZE = lambda _: randint(50, 500)
     _LSTM_OUTPUT_SIZE = lambda _: randint(50, 500)
-    _DROPOUT_RATE = lambda _: uniform(0, 1)
+    _DROPOUT_RATE = lambda _: uniform(0.1, 0.9)
 
     def __init__(self, fixed_config_keys):
         """
