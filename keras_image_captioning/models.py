@@ -3,6 +3,7 @@ from keras.models import Model
 from keras.layers import (Dense, Embedding, Input, LSTM, RepeatVector,
                           TimeDistributed)
 from keras.layers.merge import Concatenate
+from keras.layers.wrappers import Bidirectional
 from keras.optimizers import Adam
 
 from .config import active_config
@@ -16,7 +17,8 @@ class ImageCaptioningModel(object):
                  vocab_size=None,
                  embedding_size=None,
                  lstm_output_size=None,
-                 dropout_rate=None):
+                 dropout_rate=None,
+                 bidirectional_rnn=None):
         """
         If an arg is None, it will get its value from config.active_config.
         """
@@ -26,6 +28,12 @@ class ImageCaptioningModel(object):
         self._lstm_output_size = (lstm_output_size or
                                   active_config().lstm_output_size)
         self._dropout_rate = dropout_rate or active_config().dropout_rate
+
+        if bidirectional_rnn is None:
+            self._bidirectional_rnn = active_config().bidirectional_rnn
+        else:
+            self._bidirectional_rnn = bidirectional_rnn
+
         self._keras_model = None
 
         if self._vocab_size is None:
@@ -81,6 +89,10 @@ class ImageCaptioningModel(object):
                     return_sequences=True,
                     dropout=self._dropout_rate,
                     recurrent_dropout=self._dropout_rate,
-                    implementation=2)(sequence_input)
+                    implementation=2)
+
+        lstm = Bidirectional(lstm) if self._bidirectional_rnn else lstm
+        lstm = lstm(sequence_input)
         time_dist_dense = TimeDistributed(Dense(units=self._vocab_size))(lstm)
+
         return time_dist_dense
