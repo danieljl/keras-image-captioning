@@ -47,3 +47,14 @@ class TestImageCaptioningModel(object):
         model._rnn_type = 'gru' if model._rnn_type == 'lstm' else 'lstm'
         model.build()
         assert isinstance(model.keras_model, keras.models.Model)
+
+    def test_arg_rnn_layers(self, model):
+        model._rnn_layers = 2 if model._rnn_layers == 1 else 1
+        model.build()
+        assert isinstance(model.keras_model, keras.models.Model)
+
+    def test_arg_rnn_layers_and_rnn_type(self, model):
+        model._rnn_type = 'gru' if model._rnn_type == 'lstm' else 'lstm'
+        model._rnn_layers = 2 if model._rnn_layers == 1 else 1
+        model.build()
+        assert isinstance(model.keras_model, keras.models.Model)

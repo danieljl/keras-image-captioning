@@ -25,6 +25,7 @@ Config = namedtuple('Config', '''
 
     bidirectional_rnn
     rnn_type
+    rnn_layers
 ''')
 
 
@@ -57,7 +58,8 @@ class DefaultConfigBuilder(ConfigBuilderBase):
                       rnn_output_size=256,
                       dropout_rate=0.3,
                       bidirectional_rnn=False,
-                      rnn_type='lstm')
+                      rnn_type='lstm',
+                      rnn_layers=1)
 
 
 class RandomConfigBuilder(ConfigBuilderBase):
@@ -72,6 +74,7 @@ class RandomConfigBuilder(ConfigBuilderBase):
     _DROPOUT_RATE = lambda _: uniform(0.1, 0.9)
     _BIDIRECTIONAL_RNN = lambda _: choice([True, False])
     _RNN_TYPE = lambda _: choice(['lstm', 'gru'])
+    _RNN_LAYERS = lambda _: randint(1, 2)
 
     def __init__(self, fixed_config_keys):
         """
@@ -103,7 +106,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
             rnn_output_size=self._RNN_OUTPUT_SIZE(),
             dropout_rate=self._DROPOUT_RATE(),
             bidirectional_rnn=self._BIDIRECTIONAL_RNN(),
-            rnn_type=self._RNN_TYPE())
+            rnn_type=self._RNN_TYPE(),
+            rnn_layers=self._RNN_LAYERS())
 
         config_dict.update(self._fixed_config_keys)
 

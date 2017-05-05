@@ -19,7 +19,8 @@ class ImageCaptioningModel(object):
                  rnn_output_size=None,
                  dropout_rate=None,
                  bidirectional_rnn=None,
-                 rnn_type=None):
+                 rnn_type=None,
+                 rnn_layers=None):
         """
         If an arg is None, it will get its value from config.active_config.
         """
@@ -30,6 +31,7 @@ class ImageCaptioningModel(object):
                                  active_config().rnn_output_size)
         self._dropout_rate = dropout_rate or active_config().dropout_rate
         self._rnn_type = rnn_type or active_config().rnn_type
+        self._rnn_layers = rnn_layers or active_config().rnn_layers
 
         if bidirectional_rnn is None:
             self._bidirectional_rnn = active_config().bidirectional_rnn
@@ -45,6 +47,9 @@ class ImageCaptioningModel(object):
 
         if self._rnn_type not in ('lstm', 'gru'):
             raise ValueError('rnn_type must be either "lstm" or "gru"!')
+
+        if self._rnn_layers < 1:
+            raise ValueError('rnn_layers must be >= 1!')
 
     @property
     def keras_model(self):
@@ -91,14 +96,20 @@ class ImageCaptioningModel(object):
 
     def _build_sequence_model(self, sequence_input):
         RNN = GRU if self._rnn_type == 'gru' else LSTM
-        rnn = RNN(units=self._rnn_output_size,
-                  return_sequences=True,
-                  dropout=self._dropout_rate,
-                  recurrent_dropout=self._dropout_rate,
-                  implementation=2)
 
-        rnn = Bidirectional(rnn) if self._bidirectional_rnn else rnn
-        rnn = rnn(sequence_input)
-        time_dist_dense = TimeDistributed(Dense(units=self._vocab_size))(rnn)
+        def rnn():
+            rnn = RNN(units=self._rnn_output_size,
+                      return_sequences=True,
+                      dropout=self._dropout_rate,
+                      recurrent_dropout=self._dropout_rate,
+                      implementation=2)
+            rnn = Bidirectional(rnn) if self._bidirectional_rnn else rnn
+            return rnn
+
+        input_ = sequence_input
+        for _ in range(self._rnn_layers):
+            rnn_out = rnn()(input_)
+            input_ = rnn_out
+        time_dist_dense = TimeDistributed(Dense(units=self._vocab_size))(rnn_out)
 
         return time_dist_dense
