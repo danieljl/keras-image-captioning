@@ -1,4 +1,5 @@
 import pytest
+import sys
 
 from datetime import timedelta
 
@@ -22,7 +23,8 @@ class TestTraining(object):
         training.Training('training-test', conf=conf)
 
         conf = conf._replace(epochs=None, time_limit=timedelta(minutes=2))
-        training.Training('training-test', conf=conf)
+        train = training.Training('training-test', conf=conf)
+        assert train._epochs == sys.maxsize
 
     def test_run(self, mocker):
         mocker.patch.object(training.DatasetProvider, 'training_steps',

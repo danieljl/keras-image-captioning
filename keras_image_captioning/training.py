@@ -46,6 +46,9 @@ class Training(object):
             raise ValueError('Either conf.epochs or conf.time_limit must be '
                              'set, but not both!')
 
+        if self._time_limit:
+            self._epochs = sys.maxsize
+
         self._activate_config_and_init_dataset_provider()
         self._init_result_dir()
         self._init_callbacks()
