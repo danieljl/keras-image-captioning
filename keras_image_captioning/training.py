@@ -1,6 +1,8 @@
 import fire
 import os
 import signal
+import sys
+import traceback
 
 from keras.callbacks import (CSVLogger, EarlyStopping, ModelCheckpoint,
                              ReduceLROnPlateau, TensorBoard)
@@ -55,9 +57,27 @@ class Training(object):
         self._model = ImageCaptioningModel()
         self._write_active_config()
 
+        self._stop_training = False
+
+    @property
+    def keras_model(self):
+        return self._model.keras_model
+
+    @property
+    def result_dir(self):
+        return self._result_dir
+
     def run(self):
         self._model.build()
-        self._model.keras_model.fit_generator(
+
+        # self._model.build() is expensive so it increases the chance of a race
+        # condition. Checking self._stop_training will minimize it (but it is
+        # still possible).
+        if self._stop_training:
+            self._stop_training = False
+            return
+
+        self.keras_model.fit_generator(
                 generator=self._dataset_provider.training_set(),
                 steps_per_epoch=self._dataset_provider.training_steps,
                 epochs=self._epochs,
@@ -68,13 +88,15 @@ class Training(object):
                 callbacks=self._callbacks,
                 verbose=self._verbose)
 
-    @property
-    def keras_model(self):
-        return self._model.keras_model
+        self._stop_training = False
 
-    @property
-    def result_dir(self):
-        return self._result_dir
+    def stop_training(self):
+        self._stop_training = True
+        try:
+            self.keras_model.stop_training = True
+        # Race condition: ImageCaptioningModel.build is not called yet
+        except AttributeError:
+            pass
 
     def _activate_config_and_init_dataset_provider(self):
         config.active_config(self._config)
@@ -160,9 +182,12 @@ def main(training_label, config_file=None, **kwargs):
     training = Training(training_label, **kwargs)
 
     def handler(signum, frame):
-        print_flush('Stopping training...')
+        print_flush('Stopping training..')
         print_flush('(Training will stop after the current epoch)')
-        training.keras_model.stop_training = True
+        try:
+            training.stop_training()
+        except:
+            traceback.print_exc(file=sys.stderr)
     signal.signal(signal.SIGINT, handler)
 
     training.run()
