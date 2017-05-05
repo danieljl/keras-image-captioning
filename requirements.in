@@ -2,7 +2,7 @@ fire
 futures
 h5py
 ipykernel
-keras==2.0.2
+keras==2.0.4
 mock
 numpy
 pillow
@@ -11,4 +11,4 @@ pytest
 pytest-mock
 pyyaml
 sh
-tensorflow>=1.0,<1.1
+tensorflow>=1.0,<2
