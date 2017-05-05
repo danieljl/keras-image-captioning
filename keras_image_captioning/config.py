@@ -12,14 +12,17 @@ Config = namedtuple('Config', '''
     time_limit
     batch_size
     reduce_lr_factor
+
     lemmatize_caption
     rare_words_handling
     words_min_occur
+
     learning_rate
     vocab_size
     embedding_size
     lstm_output_size
     dropout_rate
+
     bidirectional_rnn
 ''')
 
