@@ -66,32 +66,33 @@ class HyperparamSearch(object):
         return self._lock
 
     def run(self):
-        self._stop_search = False
         for search_index in itertools.count():
             self._semaphore.acquire()
 
             with self.lock:
                 if self._stop_search:
                     break
+
                 training_label = self.training_label(search_index)
                 config = self._config_builder.build_config()
                 gpu_index = self._available_gpus.pop()
                 done_callback = self._create_done_callback(gpu_index)
+
                 command = TrainingCommand(training_label=training_label,
                                           config=config,
                                           gpu_index=gpu_index,
                                           background=True,
                                           done_callback=done_callback)
                 self.running_commands.append((search_index, command.execute()))
-                logging('Running training label {}..'.format(training_label))
+                logging('Running training {}..'.format(training_label))
 
-        for search_index, running_command in self.running_commands:
-            training_label = self.training_label(search_index)
-            logging('Waiting {} to finish..'.format(training_label))
-            try:
-                running_command.wait()
-            except sh.ErrorReturnCode as e:
-                logging('{} returned a non-zero code!'.format(training_label))
+                self._remove_finished_commands()
+
+        # For now, the program won't reach this line since itertools.count()
+        # returns an infinite number generator. The code below is a reminder
+        # to wait running commands when in the future finite hyperparam search
+        # want to be implemented.
+        self._wait_running_commands()
 
     def stop(self):
         self._stop_search = True
@@ -104,6 +105,25 @@ class HyperparamSearch(object):
             self._available_gpus.add(gpu_index)
             self._semaphore.release()
         return done_callback
+
+    def _remove_finished_commands(self):
+        running_commands = []
+        for search_index, running_command in self.running_commands:
+            if running_command.process.is_alive()[0]:
+                running_commands.append((search_index, running_command))
+            else:
+                training_label = self.training_label(search_index)
+                logging('Training {} has finished.'.format(training_label))
+        self._running_commands = running_commands
+
+    def _wait_running_commands(self):
+        for search_index, running_command in self.running_commands:
+            training_label = self.training_label(search_index)
+            logging('Waiting {} to finish..'.format(training_label))
+            try:
+                running_command.wait()
+            except sh.ErrorReturnCode as e:
+                logging('{} returned a non-zero code!'.format(training_label))
 
 
 class TrainingCommand(object):
@@ -196,7 +216,7 @@ def main(training_label_prefix,
                     logging('Sending SIGINT to {}..'.format(label))
                     running_command.signal(signal.SIGINT)
                 except OSError:  # The process might have exited before
-                    logging('{} might have exited before.'.format(label))
+                    logging('{} might have terminated before.'.format(label))
                 except:
                     traceback.print_exc(file=sys.stderr)
             logging('All training processes have been sent SIGINT.')
