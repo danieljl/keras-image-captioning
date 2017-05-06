@@ -81,15 +81,15 @@ class RandomConfigBuilder(ConfigBuilderBase):
     _LEMMATIZE_CAPTION = lambda _: choice([True, False])
     _RARE_WORDS_HANDLING = lambda _: choice(['nothing', 'discard', 'change'])
     _WORDS_MIN_OCCUR = lambda _: randint(1, 5)
-    _LEARNING_RATE = lambda _: 10**uniform(-4, -1)
-    _EMBEDDING_SIZE = lambda _: randint(50, 500)
-    _RNN_OUTPUT_SIZE = lambda _: randint(50, 500)
-    _DROPOUT_RATE = lambda _: uniform(0.1, 0.9)
+    _LEARNING_RATE = lambda _: 10**uniform(-5, -3)
+    _EMBEDDING_SIZE = lambda _: 100 * randint(1, 5)
+    _RNN_OUTPUT_SIZE = lambda _: 100 * randint(1, 5)
+    _DROPOUT_RATE = lambda _: uniform(0.1, 0.6)
     _BIDIRECTIONAL_RNN = lambda _: choice([True, False])
     _RNN_TYPE = lambda _: choice(['lstm', 'gru'])
     _RNN_LAYERS = lambda _: randint(1, 2)
-    _L1_REG = lambda _: 10**uniform(-4, -1)
-    _L2_REG = lambda _: 10**uniform(-4, -1)
+    _L1_REG = lambda _: 10**uniform(-5, -2)
+    _L2_REG = lambda _: 10**uniform(-5, -2)
 
     def __init__(self, fixed_config_keys):
         """
