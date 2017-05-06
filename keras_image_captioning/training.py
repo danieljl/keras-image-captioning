@@ -77,6 +77,7 @@ class Training(object):
             self._stop_training = False
             return
 
+        logging('Training {} is starting..'.format(self._training_label))
         self.keras_model.fit_generator(
                 generator=self._dataset_provider.training_set(),
                 steps_per_epoch=self._dataset_provider.training_steps,

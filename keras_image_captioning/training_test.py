@@ -34,11 +34,13 @@ class TestTraining(object):
                             mocker.PropertyMock(return_value=2))
         mocker.patch.object(training.DatasetProvider, 'validation_steps',
                             mocker.PropertyMock(return_value=2))
+        logging_mock = mocker.patch.object(training, 'logging')
 
         conf = config.DefaultConfigBuilder().build_config()
         conf = conf._replace(epochs=2, time_limit=None, batch_size=2)
         train = training.Training(TRAINING_LABEL, conf=conf)
         train.run()
+        assert logging_mock.call_count == 2
 
 
 def test_main(mocker):
