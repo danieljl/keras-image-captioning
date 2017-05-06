@@ -21,7 +21,8 @@ class HyperparamSearch(object):
                  training_label_prefix,
                  dataset_name=None,
                  epochs=None,
-                 time_limit=None):
+                 time_limit=None,
+                 num_gpus=None):
         if not ((epochs is None) ^ (time_limit is None)):
             raise ValueError('epochs or time_limit must present, '
                              'but not both!')
@@ -34,10 +35,13 @@ class HyperparamSearch(object):
                                  epochs=self._epochs,
                                  time_limit=self._time_limit)
         self._config_builder = RandomConfigBuilder(fixed_config_keys)
+
         try:
             self._num_gpus = len(sh.nvidia_smi('-L').split('\n')) - 1
         except sh.CommandNotFound:
             self._num_gpus = 1
+        self._num_gpus = num_gpus or self._num_gpus
+
         # TODO ! Replace set with a thread-safe set
         self._available_gpus = set(range(self.num_gpus))
         self._semaphore = Semaphore(self.num_gpus)
@@ -173,13 +177,16 @@ class TrainingCommand(object):
 def main(training_label_prefix,
          dataset_name=None,
          epochs=None,
-         time_limit=None):
+         time_limit=None,
+         num_gpus=None):
     epochs = int(epochs) if epochs else None
     time_limit = parse_timedelta(time_limit) if time_limit else None
+    num_gpus = int(num_gpus) if num_gpus else None
     search = HyperparamSearch(training_label_prefix=training_label_prefix,
                               dataset_name=dataset_name,
                               epochs=epochs,
-                              time_limit=time_limit)
+                              time_limit=time_limit,
+                              num_gpus=num_gpus)
 
     def handler(signum, frame):
         logging('Stopping hyperparam search..')

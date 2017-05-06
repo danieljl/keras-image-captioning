@@ -18,6 +18,21 @@ EPOCHS = 2
 
 
 class TestHyperparamSearch(object):
+    def test__init__(self, mocker):
+        mocker.patch.object(HyperparamSearch, 'num_gpus',
+                            mocker.PropertyMock(return_value=NUM_GPUS))
+        search = HyperparamSearch(training_label_prefix='test/hpsearch/norun',
+                                  dataset_name='flickr8k',
+                                  epochs=EPOCHS)
+        assert search.num_gpus == NUM_GPUS
+
+    def test___init___with_num_gpus(self):
+        search = HyperparamSearch(training_label_prefix='test/hpsearch/norun',
+                                  dataset_name='flickr8k',
+                                  epochs=EPOCHS,
+                                  num_gpus=NUM_GPUS + 1)
+        assert search.num_gpus == NUM_GPUS + 1
+
     def test_run(self, mocker):
         if DRY_RUN:
             mocker.patch.object(TrainingCommand, 'config_filepath',
