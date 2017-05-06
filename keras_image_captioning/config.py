@@ -1,6 +1,8 @@
 import yaml
+import sys
 
 from collections import namedtuple
+from datetime import timedelta
 from random import choice, randint, uniform
 
 from .common_utils import parse_timedelta
@@ -54,12 +56,13 @@ class StaticConfigBuilder(ConfigBuilderBase):
 class DefaultConfigBuilder(ConfigBuilderBase):
     def build_config(self):
         return Config(dataset_name='flickr8k',
-                      epochs=1,
-                      time_limit=None,
+                      epochs=None,
+                      time_limit=timedelta(hours=10),
                       batch_size=32,
-                      reduce_lr_factor=0.5,
-                      reduce_lr_patience=_REDUCE_LR_PATIENCE,
-                      early_stopping_patience=_EARLY_STOPPING_PATIENCE,
+                      # As nearest as possible to 1.0, but must not be >= 1.0
+                      reduce_lr_factor=1.0 - 1e-6,
+                      reduce_lr_patience=sys.maxsize,
+                      early_stopping_patience=sys.maxsize,
                       lemmatize_caption=True,
                       rare_words_handling='nothing',
                       words_min_occur=1,
