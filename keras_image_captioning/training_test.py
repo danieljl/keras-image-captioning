@@ -36,7 +36,7 @@ class TestTraining(object):
                             mocker.PropertyMock(return_value=2))
 
         conf = config.DefaultConfigBuilder().build_config()
-        conf = conf._replace(epochs=2, batch_size=2)
+        conf = conf._replace(epochs=2, time_limit=None, batch_size=2)
         train = training.Training(TRAINING_LABEL, conf=conf)
         train.run()
 
@@ -49,7 +49,8 @@ def test_main(mocker):
 
     yaml_path = '/tmp/keras_img_cap_conf_test_main.yaml'
     conf = config.DefaultConfigBuilder().build_config()
-    conf = conf._replace(epochs=None, time_limit=timedelta(minutes=2))
+    conf = conf._replace(epochs=None, time_limit=timedelta(seconds=15),
+                         batch_size=2)
     config.write_to_file(conf, yaml_path)
 
     train = training.main(training_label=TRAINING_LABEL,

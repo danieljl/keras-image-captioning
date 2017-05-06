@@ -37,9 +37,15 @@ class TestHyperparamSearch(object):
 
 class TestTrainingCommand(object):
     @pytest.fixture
+    def config_used(self):
+        config = active_config()
+        config = config._replace(epochs=2, time_limit=None, batch_size=2)
+        return config
+
+    @pytest.fixture
     def training_command(self):
         return TrainingCommand(training_label='test/hpsearch/training-command',
-                               config=active_config(),
+                               config=self.config_used(),
                                gpu_index=0,
                                background=True)
 
@@ -62,11 +68,11 @@ class TestTrainingCommand(object):
 
         assert len(finished) == 1 and finished[0]
 
-    def test__init_config_filepath(self, training_command):
+    def test__init_config_filepath(self, training_command, config_used):
         training_command._init_config_filepath()
         config_builder = FileConfigBuilder(training_command._config_filepath)
         config = config_builder.build_config()
-        assert config == active_config()
+        assert config == config_used
 
     def test__init_log_filepath(self, training_command):
         training_command._init_log_filepath()
