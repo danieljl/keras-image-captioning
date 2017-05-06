@@ -6,12 +6,18 @@ from random import choice, randint, uniform
 from .common_utils import parse_timedelta
 
 
+_REDUCE_LR_PATIENCE = 2
+_EARLY_STOPPING_PATIENCE = 4
+
 Config = namedtuple('Config', '''
     dataset_name
     epochs
     time_limit
     batch_size
+
     reduce_lr_factor
+    reduce_lr_patience
+    early_stopping_patience
 
     lemmatize_caption
     rare_words_handling
@@ -52,6 +58,8 @@ class DefaultConfigBuilder(ConfigBuilderBase):
                       time_limit=None,
                       batch_size=32,
                       reduce_lr_factor=0.5,
+                      reduce_lr_patience=_REDUCE_LR_PATIENCE,
+                      early_stopping_patience=_EARLY_STOPPING_PATIENCE,
                       lemmatize_caption=True,
                       rare_words_handling='nothing',
                       words_min_occur=1,
@@ -104,6 +112,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
         config_dict = dict(
             batch_size=self._BATCH_SIZE(),
             reduce_lr_factor=self._REDUCE_LR_FACTOR(),
+            reduce_lr_patience=_REDUCE_LR_PATIENCE,
+            early_stopping_patience=_EARLY_STOPPING_PATIENCE,
             lemmatize_caption=self._LEMMATIZE_CAPTION(),
             rare_words_handling='nothing',
             words_min_occur=1,

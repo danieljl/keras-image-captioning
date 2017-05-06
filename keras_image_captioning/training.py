@@ -19,8 +19,6 @@ class Training(object):
     def __init__(self,
                  training_label,
                  conf=None,
-                 reduce_lr_patience=2,
-                 early_stopping_patience=4,
                  min_loss_delta=1e-4,
                  max_q_size=10,
                  workers=1,
@@ -31,14 +29,16 @@ class Training(object):
             epochs
             time_limit
             reduce_lr_factor
+            reduce_lr_patience
+            early_stopping_patience
         """
         self._training_label = training_label
         self._config = conf or config.DefaultConfigBuilder().build_config()
         self._epochs = self._config.epochs
         self._time_limit = self._config.time_limit
         self._reduce_lr_factor = self._config.reduce_lr_factor
-        self._reduce_lr_patience = reduce_lr_patience
-        self._early_stopping_patience = early_stopping_patience
+        self._reduce_lr_patience = self._config.reduce_lr_patience
+        self._early_stopping_patience = self._config.early_stopping_patience
         self._min_loss_delta = min_loss_delta
         self._max_q_size = max_q_size
         self._workers = workers
