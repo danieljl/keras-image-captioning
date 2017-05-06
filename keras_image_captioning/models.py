@@ -3,6 +3,7 @@ from keras.models import Model
 from keras.layers import (Dense, Embedding, GRU, Input, LSTM, RepeatVector,
                           TimeDistributed)
 from keras.layers.merge import Concatenate
+from keras.layers.normalization import BatchNormalization
 from keras.layers.wrappers import Bidirectional
 from keras.optimizers import Adam
 from keras.regularizers import l1_l2
@@ -88,11 +89,12 @@ class ImageCaptioningModel(object):
         for layer in image_model.layers:
             layer.trainable = False
 
+        dense_input = BatchNormalization(axis=-1)(image_model.output)
         image_dense = Dense(units=self._embedding_size,
                             kernel_regularizer=self._regularizer,
                             bias_regularizer=self._regularizer,
                             activity_regularizer=self._regularizer
-                            )(image_model.output)
+                            )(dense_input)
         # Add timestep dimension
         image_embedding = RepeatVector(1)(image_dense)
 
@@ -126,6 +128,7 @@ class ImageCaptioningModel(object):
 
         input_ = sequence_input
         for _ in range(self._rnn_layers):
+            input_ = BatchNormalization(axis=-1)(input_)
             rnn_out = rnn()(input_)
             input_ = rnn_out
         time_dist_dense = TimeDistributed(Dense(units=self._vocab_size))(rnn_out)
