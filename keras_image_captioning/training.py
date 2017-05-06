@@ -89,6 +89,7 @@ class Training(object):
                 verbose=self._verbose)
 
         self._stop_training = False
+        logging('Training {} has finished.'.format(self._training_label))
 
     def stop_training(self):
         self._stop_training = True
