@@ -47,7 +47,8 @@ class TestHyperparamSearch(object):
                                   dataset_name='flickr8k',
                                   epochs=EPOCHS)
         search.run()
-        assert all(not x.process.is_alive()[0] for x in search.running_history)
+        assert all(not x[1].process.is_alive()[0]
+                   for x in search.running_commands)
 
 
 class TestTrainingCommand(object):

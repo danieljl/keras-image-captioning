@@ -45,8 +45,7 @@ class HyperparamSearch(object):
         # TODO ! Replace set with a thread-safe set
         self._available_gpus = set(range(self.num_gpus))
         self._semaphore = Semaphore(self.num_gpus)
-        self._command_history = []
-        self._running_history = []
+        self._running_commands = []  # a list of (index, sh.RunningCommand)
         self._stop_search = False
         self._lock = Lock()
 
@@ -59,8 +58,8 @@ class HyperparamSearch(object):
         return self._num_gpus
 
     @property
-    def running_history(self):
-        return self._running_history
+    def running_commands(self):
+        return self._running_commands
 
     @property
     def lock(self):
@@ -83,11 +82,10 @@ class HyperparamSearch(object):
                                           gpu_index=gpu_index,
                                           background=True,
                                           done_callback=done_callback)
-                self._command_history.append(command)
-                self.running_history.append(command.execute())
+                self.running_commands.append((search_index, command.execute()))
                 logging('Running training label {}..'.format(training_label))
 
-        for search_index, running_command in enumerate(self.running_history):
+        for search_index, running_command in self.running_commands:
             training_label = self.training_label(search_index)
             logging('Waiting {} to finish..'.format(training_label))
             try:
@@ -192,7 +190,7 @@ def main(training_label_prefix,
         logging('Stopping hyperparam search..')
         with search.lock:
             search.stop()
-            for index, running_command in enumerate(search.running_history):
+            for index, running_command in search.running_commands:
                 try:
                     label = search.training_label(index)
                     logging('Sending SIGINT to {}..'.format(label))
