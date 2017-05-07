@@ -9,11 +9,13 @@ backports.shutil-get-terminal-size==1.0.0  # via ipython
 backports.ssl-match-hostname==3.5.0.1  # via tornado
 certifi==2017.4.17        # via tornado
 click==6.7                # via pip-tools
+cycler==0.10.0            # via matplotlib
 decorator==4.0.11         # via ipython, traitlets
 enum34==1.1.6             # via traitlets
 fire==0.1.0
 first==2.0.1              # via pip-tools
 funcsigs==1.0.2           # via mock
+functools32==3.2.3.post2  # via matplotlib
 futures==3.1.1
 h5py==2.7.0
 ipykernel==4.6.1
@@ -22,9 +24,11 @@ ipython==5.3.0            # via fire, ipykernel
 jupyter-client==5.0.1     # via ipykernel
 jupyter-core==4.3.0       # via jupyter-client
 keras==2.0.4
+matplotlib==2.0.1
 mock==2.0.0
 numpy==1.12.1
 olefile==0.44             # via pillow
+pandas==0.20.1
 pathlib2==2.2.1           # via ipython, pickleshare
 pbr==3.0.0                # via mock
 pexpect==4.2.1            # via ipython
@@ -36,9 +40,11 @@ protobuf==3.3.0           # via tensorflow
 ptyprocess==0.5.1         # via pexpect
 py==1.4.33                # via pytest
 pygments==2.2.0           # via ipython
+pyparsing==2.2.0          # via matplotlib
 pytest-mock==1.6.0
 pytest==3.0.7
-python-dateutil==2.6.0    # via jupyter-client
+python-dateutil==2.6.0    # via jupyter-client, matplotlib, pandas
+pytz==2017.2              # via matplotlib, pandas
 pyyaml==3.12
 pyzmq==16.0.2             # via jupyter-client
 scandir==1.5              # via pathlib2
@@ -46,7 +52,8 @@ scipy==0.19.0             # via theano
 sh==1.12.13
 simplegeneric==0.8.1      # via ipython
 singledispatch==3.4.0.3   # via tornado
-six==1.10.0               # via fire, h5py, keras, mock, pathlib2, pip-tools, prompt-toolkit, protobuf, python-dateutil, singledispatch, tensorflow, theano, traitlets
+six==1.10.0               # via cycler, fire, h5py, keras, matplotlib, mock, pathlib2, pip-tools, prompt-toolkit, protobuf, python-dateutil, singledispatch, tensorflow, theano, traitlets
+subprocess32==3.2.7       # via matplotlib
 tensorflow==1.1.0
 theano==0.9.0             # via keras
 tornado==4.5.1            # via ipykernel
