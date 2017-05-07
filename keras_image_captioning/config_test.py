@@ -15,8 +15,8 @@ class TestStaticConfigBuilder(object):
 class TestDefaultConfigBuilder(object):
     def test_build_config(self):
         conf = config.DefaultConfigBuilder().build_config()
-        assert conf.epochs is not None
-        assert conf.time_limit is None
+        assert conf.epochs is None
+        assert conf.time_limit is not None
         assert conf.vocab_size is None
 
 
