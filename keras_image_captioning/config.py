@@ -91,8 +91,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
     _BIDIRECTIONAL_RNN = lambda _: choice([True, False])
     _RNN_TYPE = lambda _: choice(['lstm', 'gru'])
     _RNN_LAYERS = lambda _: randint(1, 2)
-    _L1_REG = lambda _: 10**uniform(-5, -2)
-    _L2_REG = lambda _: 10**uniform(-5, -2)
+    _L1_REG = lambda _: 10**uniform(-5, 5)
+    _L2_REG = lambda _: 10**uniform(-5, 5)
 
     def __init__(self, fixed_config_keys):
         """
