@@ -24,7 +24,8 @@ class ImageCaptioningModel(object):
                  rnn_type=None,
                  rnn_layers=None,
                  l1_reg=None,
-                 l2_reg=None):
+                 l2_reg=None,
+                 initializer=None):
         """
         If an arg is None, it will get its value from config.active_config.
         """
@@ -36,6 +37,7 @@ class ImageCaptioningModel(object):
         self._dropout_rate = dropout_rate or active_config().dropout_rate
         self._rnn_type = rnn_type or active_config().rnn_type
         self._rnn_layers = rnn_layers or active_config().rnn_layers
+        self._initializer = initializer or active_config().initializer
 
         if bidirectional_rnn is None:
             self._bidirectional_rnn = active_config().bidirectional_rnn
@@ -93,7 +95,8 @@ class ImageCaptioningModel(object):
         image_dense = Dense(units=self._embedding_size,
                             kernel_regularizer=self._regularizer,
                             bias_regularizer=self._regularizer,
-                            activity_regularizer=self._regularizer
+                            activity_regularizer=self._regularizer,
+                            kernel_initializer=self._initializer
                             )(dense_input)
         # Add timestep dimension
         image_embedding = RepeatVector(1)(image_dense)
@@ -108,6 +111,7 @@ class ImageCaptioningModel(object):
                             output_dim=self._embedding_size,
                             embeddings_regularizer=self._regularizer,
                             activity_regularizer=self._regularizer,
+                            embeddings_initializer=self._initializer
                          )(sentence_input)
         return sentence_input, word_embedding
 
@@ -123,6 +127,7 @@ class ImageCaptioningModel(object):
                       recurrent_regularizer=self._regularizer,
                       bias_regularizer=self._regularizer,
                       activity_regularizer=self._regularizer,
+                      kernel_initializer=self._initializer,
                       implementation=2)
             rnn = Bidirectional(rnn) if self._bidirectional_rnn else rnn
             return rnn

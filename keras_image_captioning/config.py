@@ -37,6 +37,8 @@ Config = namedtuple('Config', '''
 
     l1_reg
     l2_reg
+
+    initializer
 ''')
 
 
@@ -75,7 +77,8 @@ class DefaultConfigBuilder(ConfigBuilderBase):
                       rnn_type='lstm',
                       rnn_layers=1,
                       l1_reg=0.0,
-                      l2_reg=0.0)
+                      l2_reg=0.0,
+                      initializer='glorot_uniform')
 
 
 class RandomConfigBuilder(ConfigBuilderBase):
@@ -93,6 +96,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
     _RNN_LAYERS = lambda _: randint(1, 2)
     _L1_REG = lambda _: 10**uniform(-5, 5)
     _L2_REG = lambda _: 10**uniform(-5, 5)
+    _INITIALIZER = lambda _: choice(['glorot_normal', 'glorot_uniform',
+                                     'he_normal', 'he_uniform'])
 
     def __init__(self, fixed_config_keys):
         """
@@ -129,7 +134,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
             rnn_type=self._RNN_TYPE(),
             rnn_layers=self._RNN_LAYERS(),
             l1_reg=self._L1_REG(),
-            l2_reg=self._L2_REG())
+            l2_reg=self._L2_REG(),
+            initializer=self._INITIALIZER())
 
         config_dict.update(self._fixed_config_keys)
 
