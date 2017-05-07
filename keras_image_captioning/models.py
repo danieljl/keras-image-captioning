@@ -106,7 +106,8 @@ class ImageCaptioningModel(object):
         word_embedding = Embedding(
                             input_dim=self._vocab_size,
                             output_dim=self._embedding_size,
-                            embeddings_regularizer=self._regularizer
+                            embeddings_regularizer=self._regularizer,
+                            activity_regularizer=self._regularizer,
                          )(sentence_input)
         return sentence_input, word_embedding
 
