@@ -87,7 +87,7 @@ class RandomConfigBuilder(ConfigBuilderBase):
     _LEARNING_RATE = lambda _: 10**uniform(-5, -3)
     _EMBEDDING_SIZE = lambda _: 100 * randint(1, 5)
     _RNN_OUTPUT_SIZE = lambda _: 100 * randint(1, 5)
-    _DROPOUT_RATE = lambda _: uniform(0.1, 0.6)
+    _DROPOUT_RATE = lambda _: uniform(0.1, 0.9)
     _BIDIRECTIONAL_RNN = lambda _: choice([True, False])
     _RNN_TYPE = lambda _: choice(['lstm', 'gru'])
     _RNN_LAYERS = lambda _: randint(1, 2)
