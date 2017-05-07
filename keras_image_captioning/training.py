@@ -131,8 +131,7 @@ class Training(object):
                                            verbose=self._verbose)
 
         tensorboard = TensorBoard(log_dir=self._result_dir,
-                                  histogram_freq=1,
-                                  write_graph=True)
+                                  write_graph=False)
 
         reduce_lr = ReduceLROnPlateau(monitor='val_loss',
                                       mode='min',
