@@ -115,7 +115,7 @@ class Training(object):
         log_lr = LogLearningRate()
         log_ts = LogTimestamp()
 
-        CSV_FILENAME = 'metrics_log.csv'
+        CSV_FILENAME = 'metrics-log.csv'
         self._csv_filepath = self._path_from_result_dir(CSV_FILENAME)
         csv_logger = CSVLogger(filename=self._csv_filepath)
 
@@ -162,7 +162,7 @@ class Training(object):
                            stop_after]  # Must be the last
 
     def _write_active_config(self):
-        CONFIG_FILENAME = 'hyperparams_config.yaml'
+        CONFIG_FILENAME = 'hyperparams-config.yaml'
         self._config_filepath = self._path_from_result_dir(CONFIG_FILENAME)
         config.write_to_file(config.active_config(), self._config_filepath)
 

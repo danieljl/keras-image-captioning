@@ -183,7 +183,7 @@ class TrainingCommand(object):
         write_to_file(self._config, self._config_filepath)
 
     def _init_log_filepath(self):
-        LOG_FILENAME = 'training_log.txt'
+        LOG_FILENAME = 'training-log.txt'
         dataset = get_dataset_instance(self._config.dataset_name,
                                        self._config.lemmatize_caption)
         result_dir = os.path.join(dataset.training_results_dir,
