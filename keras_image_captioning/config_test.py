@@ -20,30 +20,40 @@ class TestDefaultConfigBuilder(object):
         assert conf.vocab_size is None
 
 
-class TestRandomConfigBuilder(object):
+class TestCoarseRandomConfigBuilder(object):
     def test_build_config_with_no_dataset_name(self):
         fixed_config_keys = {}
         with pytest.raises(ValueError):
-            config.RandomConfigBuilder(fixed_config_keys)
+            config.CoarseRandomConfigBuilder(fixed_config_keys)
 
     def test_build_config_with_neither_epochs_nor_time_limit(self):
         fixed_config_keys = dict(dataset_name='flickr8k')
         with pytest.raises(ValueError):
-            config.RandomConfigBuilder(fixed_config_keys)
+            config.CoarseRandomConfigBuilder(fixed_config_keys)
 
     def test_build_config_with_both_epochs_and_time_limit(self):
         fixed_config_keys = dict(dataset_name='flickr8k', epochs=1,
                                  time_limit=timedelta(minutes=1))
         with pytest.raises(ValueError):
-            config.RandomConfigBuilder(fixed_config_keys)
+            config.CoarseRandomConfigBuilder(fixed_config_keys)
 
     def test_build_config_with_proper_args(self):
         fixed_config_keys = dict(dataset_name='flickr8k',
                                  time_limit=timedelta(minutes=1),
                                  embedding_size=64)
-        builder = config.RandomConfigBuilder(fixed_config_keys)
+        builder = config.CoarseRandomConfigBuilder(fixed_config_keys)
         conf = builder.build_config()
         assert conf.embedding_size == 64
+
+    def test_build_config_with_overfit_true(self):
+        fixed_config_keys = dict(dataset_name='flickr8k',
+                                 time_limit=timedelta(minutes=1))
+        builder = config.CoarseRandomConfigBuilder(fixed_config_keys,
+                                                   overfit=True)
+        conf = builder.build_config()
+        assert conf.dropout_rate == 0.
+        assert conf.l1_reg == 0.
+        assert conf.l2_reg == 0.
 
 
 class TestFileConfigBuilder(object):
@@ -62,7 +72,7 @@ def test_active_config():
     fixed_config_keys = dict(dataset_name='flickr8k',
                              time_limit=timedelta(minutes=1),
                              embedding_size=64)
-    builder = config.RandomConfigBuilder(fixed_config_keys)
+    builder = config.CoarseRandomConfigBuilder(fixed_config_keys)
     random_config = builder.build_config()
     config.active_config(random_config)
     assert config.active_config() == random_config

@@ -8,9 +8,6 @@ from random import choice, randint, uniform
 from .common_utils import parse_timedelta
 
 
-_REDUCE_LR_PATIENCE = 2
-_EARLY_STOPPING_PATIENCE = 4
-
 Config = namedtuple('Config', '''
     dataset_name
     epochs
@@ -82,23 +79,6 @@ class DefaultConfigBuilder(ConfigBuilderBase):
 
 
 class RandomConfigBuilder(ConfigBuilderBase):
-    _BATCH_SIZE = lambda _: choice([16, 32, 64])
-    _REDUCE_LR_FACTOR = lambda _: uniform(0.1, 0.9)
-    _LEMMATIZE_CAPTION = lambda _: choice([True, False])
-    _RARE_WORDS_HANDLING = lambda _: choice(['nothing', 'discard', 'change'])
-    _WORDS_MIN_OCCUR = lambda _: randint(1, 5)
-    _LEARNING_RATE = lambda _: 10**uniform(-5, -3)
-    _EMBEDDING_SIZE = lambda _: 100 * randint(1, 5)
-    _RNN_OUTPUT_SIZE = lambda _: 100 * randint(1, 5)
-    _DROPOUT_RATE = lambda _: uniform(0.1, 0.9)
-    _BIDIRECTIONAL_RNN = lambda _: choice([True, False])
-    _RNN_TYPE = lambda _: choice(['lstm', 'gru'])
-    _RNN_LAYERS = lambda _: randint(1, 2)
-    _L1_REG = lambda _: 10**uniform(-5, 5)
-    _L2_REG = lambda _: 10**uniform(-5, 5)
-    _INITIALIZER = lambda _: choice(['glorot_normal', 'glorot_uniform',
-                                     'he_normal', 'he_uniform'])
-
     def __init__(self, fixed_config_keys):
         """
         Args
@@ -118,28 +98,52 @@ class RandomConfigBuilder(ConfigBuilderBase):
 
     def build_config(self):
         config_dict = dict(
-            batch_size=self._BATCH_SIZE(),
-            reduce_lr_factor=self._REDUCE_LR_FACTOR(),
-            reduce_lr_patience=_REDUCE_LR_PATIENCE,
-            early_stopping_patience=_EARLY_STOPPING_PATIENCE,
-            lemmatize_caption=self._LEMMATIZE_CAPTION(),
-            rare_words_handling='nothing',
-            words_min_occur=1,
-            learning_rate=self._LEARNING_RATE(),
+            batch_size=self._batch_size(),
+            reduce_lr_factor=self._reduce_lr_factor(),
+            reduce_lr_patience=self._reduce_lr_patience(),
+            early_stopping_patience=self._early_stopping_patience(),
+            lemmatize_caption=self._lemmatize_caption(),
+            rare_words_handling=self._rare_words_handling(),
+            words_min_occur=self._words_min_occur(),
+            learning_rate=self._learning_rate(),
             vocab_size=None,
-            embedding_size=self._EMBEDDING_SIZE(),
-            rnn_output_size=self._RNN_OUTPUT_SIZE(),
-            dropout_rate=self._DROPOUT_RATE(),
-            bidirectional_rnn=self._BIDIRECTIONAL_RNN(),
-            rnn_type=self._RNN_TYPE(),
-            rnn_layers=self._RNN_LAYERS(),
-            l1_reg=self._L1_REG(),
-            l2_reg=self._L2_REG(),
-            initializer=self._INITIALIZER())
+            embedding_size=self._embedding_size(),
+            rnn_output_size=self._rnn_output_size(),
+            dropout_rate=self._dropout_rate(),
+            bidirectional_rnn=self._bidirectional_rnn(),
+            rnn_type=self._rnn_type(),
+            rnn_layers=self._rnn_layers(),
+            l1_reg=self._l1_reg(),
+            l2_reg=self._l2_reg(),
+            initializer=self._initializer())
 
         config_dict.update(self._fixed_config_keys)
 
         return Config(**config_dict)
+
+
+class CoarseRandomConfigBuilder(RandomConfigBuilder):
+    def __init__(self, fixed_config_keys, overfit=False):
+        super(CoarseRandomConfigBuilder, self).__init__(fixed_config_keys)
+
+        self._batch_size = lambda: 32
+        self._reduce_lr_factor = lambda: 0.2
+        self._reduce_lr_patience = lambda: 2
+        self._early_stopping_patience = lambda: 4
+        self._lemmatize_caption = lambda: True
+        self._rare_words_handling = lambda: 'nothing'
+        self._words_min_occur = lambda: 1
+
+        self._learning_rate = lambda: 10**uniform(-6, 1)
+        self._embedding_size = lambda: 50 * randint(1, 10)
+        self._rnn_output_size = lambda: 50 * randint(1, 10)
+        self._dropout_rate = lambda: uniform(0, 1) if not overfit else 0.0
+        self._bidirectional_rnn = lambda: choice([True, False])
+        self._rnn_type = lambda: choice(['lstm', 'gru'])
+        self._rnn_layers = lambda: randint(1, 3)
+        self._l1_reg = lambda: 10**uniform(-5, 5) if not overfit else 0.0
+        self._l2_reg = lambda: 10**uniform(-5, 5) if not overfit else 0.0
+        self._initializer = lambda: 'he_normal'
 
 
 class FileConfigBuilder(ConfigBuilderBase):
