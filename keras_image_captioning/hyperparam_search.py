@@ -7,7 +7,9 @@ import sys
 import traceback
 
 from concurrent.futures import ThreadPoolExecutor
+from random import uniform
 from threading import Lock, Semaphore
+from time import sleep
 from tempfile import gettempdir, NamedTemporaryFile
 
 from .config import active_config, write_to_file, CoarseRandomConfigBuilder
@@ -68,6 +70,7 @@ class HyperparamSearch(object):
 
     def run(self):
         for search_index in itertools.count():
+            sleep(uniform(0.1, 1))
             self._semaphore.acquire()
 
             with self.lock:
