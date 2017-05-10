@@ -123,7 +123,7 @@ class RandomConfigBuilder(ConfigBuilderBase):
 
 
 class CoarseRandomConfigBuilder(RandomConfigBuilder):
-    def __init__(self, fixed_config_keys, overfit=False):
+    def __init__(self, fixed_config_keys):
         super(CoarseRandomConfigBuilder, self).__init__(fixed_config_keys)
 
         self._batch_size = lambda: 32
@@ -137,12 +137,12 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._learning_rate = lambda: 10**uniform(-6, 1)
         self._embedding_size = lambda: 50 * randint(1, 10)
         self._rnn_output_size = lambda: 50 * randint(1, 10)
-        self._dropout_rate = lambda: uniform(0, 1) if not overfit else 0.0
+        self._dropout_rate = lambda: uniform(0, 1)
         self._bidirectional_rnn = lambda: choice([True, False])
         self._rnn_type = lambda: choice(['lstm', 'gru'])
         self._rnn_layers = lambda: randint(1, 3)
-        self._l1_reg = lambda: 10**uniform(-5, 5) if not overfit else 0.0
-        self._l2_reg = lambda: 10**uniform(-5, 5) if not overfit else 0.0
+        self._l1_reg = lambda: 10**uniform(-5, 5)
+        self._l2_reg = lambda: 10**uniform(-5, 5)
         self._initializer = lambda: 'he_normal'
 
 
