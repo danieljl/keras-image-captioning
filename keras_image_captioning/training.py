@@ -109,9 +109,13 @@ class Training(object):
         self._result_dir = os.path.join(
                                 self._dataset_provider.training_results_dir,
                                 self._training_label)
-        if os.path.exists(self._result_dir):
+
+        CONFIG_FILENAME = 'hyperparams-config.yaml'
+        config_filepath = self._path_from_result_dir(CONFIG_FILENAME)
+        if os.path.exists(config_filepath):
             raise ValueError('Training label {} exists!'.format(
                              self._training_label))
+
         io_utils.mkdir_p(self._result_dir)
 
     def _init_callbacks(self):
