@@ -134,7 +134,7 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._rare_words_handling = lambda: 'nothing'
         self._words_min_occur = lambda: 1
 
-        self._learning_rate = lambda: 10**uniform(-6, 1)
+        self._learning_rate = lambda: 10**uniform(-6, -1)
         self._embedding_size = lambda: 50 * randint(1, 10)
         self._rnn_output_size = lambda: 50 * randint(1, 10)
         self._dropout_rate = lambda: uniform(0, 1)
