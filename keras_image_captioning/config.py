@@ -143,7 +143,8 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._rnn_layers = lambda: randint(1, 3)
         self._l1_reg = lambda: 10**uniform(-5, 5)
         self._l2_reg = lambda: 10**uniform(-5, 5)
-        self._initializer = lambda: 'he_normal'
+        self._initializer = lambda: choice(['glorot_normal', 'glorot_uniform',
+                                            'he_normal', 'he_uniform'])
 
 
 class FileConfigBuilder(ConfigBuilderBase):
