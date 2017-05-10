@@ -45,16 +45,6 @@ class TestCoarseRandomConfigBuilder(object):
         conf = builder.build_config()
         assert conf.embedding_size == 64
 
-    def test_build_config_with_overfit_true(self):
-        fixed_config_keys = dict(dataset_name='flickr8k',
-                                 time_limit=timedelta(minutes=1))
-        builder = config.CoarseRandomConfigBuilder(fixed_config_keys,
-                                                   overfit=True)
-        conf = builder.build_config()
-        assert conf.dropout_rate == 0.
-        assert conf.l1_reg == 0.
-        assert conf.l2_reg == 0.
-
 
 class TestFileConfigBuilder(object):
     def test_build_config(self):
