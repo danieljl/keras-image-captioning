@@ -105,6 +105,9 @@ class HyperparamSearch(object):
 
     def _create_done_callback(self, gpu_index):
         def done_callback(cmd, success, exit_code):
+            # NEVER write anything to stdout in done_callback
+            # OR a deadlock will happen
+
             self._available_gpus.add(gpu_index)
             self._semaphore.release()
         return done_callback
