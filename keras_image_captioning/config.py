@@ -141,8 +141,8 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._bidirectional_rnn = lambda: choice([True, False])
         self._rnn_type = lambda: choice(['lstm', 'gru'])
         self._rnn_layers = lambda: randint(1, 3)
-        self._l1_reg = lambda: 10**uniform(-5, 5)
-        self._l2_reg = lambda: 10**uniform(-5, 5)
+        self._l1_reg = lambda: 10**uniform(-9, 1)
+        self._l2_reg = lambda: 10**uniform(-9, 1)
         self._initializer = lambda: choice(['glorot_normal', 'glorot_uniform',
                                             'he_normal', 'he_uniform'])
 
