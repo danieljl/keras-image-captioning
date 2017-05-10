@@ -126,6 +126,8 @@ class HyperparamSearch(object):
                 running_command.wait()
             except sh.ErrorReturnCode as e:
                 logging('{} returned a non-zero code!'.format(training_label))
+            except:
+                traceback.print_exc(file=sys.stderr)
 
 
 class TrainingCommand(object):
