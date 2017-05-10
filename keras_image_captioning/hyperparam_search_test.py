@@ -1,7 +1,10 @@
+import os
 import pytest
 import sh
+import shutil
 
 from .config import active_config, FileConfigBuilder
+from .io_utils import path_from_var_dir
 from .hyperparam_search import (itertools, main, HyperparamSearch,
                                 TrainingCommand)
 
@@ -17,6 +20,14 @@ NUM_SEARCHES = 6
 EPOCHS = 2
 
 
+@pytest.fixture(scope='module')
+def clean_up_training_result_dir():
+    result_dir = path_from_var_dir('flickr8k/training-results/test/hpsearch')
+    if os.path.exists(result_dir):
+        shutil.rmtree(result_dir)
+
+
+@pytest.mark.usefixtures('clean_up_training_result_dir')
 class TestHyperparamSearch(object):
     def test__init__(self, mocker):
         mocker.patch.object(HyperparamSearch, 'num_gpus',
@@ -51,6 +62,7 @@ class TestHyperparamSearch(object):
                    for x in search.running_commands)
 
 
+@pytest.mark.usefixtures('clean_up_training_result_dir')
 class TestTrainingCommand(object):
     @pytest.fixture
     def config_used(self):
@@ -96,6 +108,7 @@ class TestTrainingCommand(object):
                                         training_command.training_label) != -1
 
 
+@pytest.mark.usefixtures('clean_up_training_result_dir')
 def test_main(mocker):
     if DRY_RUN:
         mocker.patch.object(TrainingCommand, 'config_filepath',

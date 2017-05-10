@@ -1,15 +1,27 @@
+import os
 import pytest
+import shutil
 import sys
 
 from datetime import timedelta
 
 from . import config
 from . import training
+from .io_utils import path_from_var_dir
 
 
 TRAINING_LABEL = 'test/training'
 
 
+@pytest.fixture(scope='module')
+def clean_up_training_result_dir():
+    result_dir = path_from_var_dir('flickr8k/training-results',
+                                   TRAINING_LABEL)
+    if os.path.exists(result_dir):
+        shutil.rmtree(result_dir)
+
+
+@pytest.mark.usefixtures('clean_up_training_result_dir')
 class TestTraining(object):
     def test___init__(self):
         conf = config.DefaultConfigBuilder().build_config()
@@ -43,6 +55,7 @@ class TestTraining(object):
         assert logging_mock.call_count == 2
 
 
+@pytest.mark.usefixtures('clean_up_training_result_dir')
 def test_main(mocker):
     with pytest.raises(ValueError):
         training.main(training_label=TRAINING_LABEL, conf='foo')
