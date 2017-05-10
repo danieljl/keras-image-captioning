@@ -127,8 +127,8 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         super(CoarseRandomConfigBuilder, self).__init__(fixed_config_keys)
 
         self._batch_size = lambda: 32
-        self._reduce_lr_factor = lambda: 0.2
-        self._reduce_lr_patience = lambda: 2
+        self._reduce_lr_factor = lambda: 1.0 - 1e-6
+        self._reduce_lr_patience = lambda: sys.maxsize
         self._early_stopping_patience = lambda: 4
         self._lemmatize_caption = lambda: True
         self._rare_words_handling = lambda: 'nothing'
