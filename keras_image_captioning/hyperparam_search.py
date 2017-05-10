@@ -31,6 +31,8 @@ class HyperparamSearch(object):
 
         self._training_label_prefix = training_label_prefix
         self._dataset_name = dataset_name or active_config().dataset_name
+        self._validate_training_label_prefix()
+
         self._epochs = epochs
         self._time_limit = time_limit
         fixed_config_keys = dict(dataset_name=self._dataset_name,
@@ -98,6 +100,14 @@ class HyperparamSearch(object):
 
     def training_label(self, search_index):
         return '{}/{:04d}'.format(self.training_label_prefix, search_index)
+
+    def _validate_training_label_prefix(self):
+        dataset = get_dataset_instance(self._dataset_name)
+        prefix_dir = os.path.join(dataset.training_results_dir,
+                                  self._training_label_prefix)
+        if os.path.exists(prefix_dir):
+            raise ValueError('Training label prefix {} exists!'.format(
+                             self._training_label_prefix))
 
     def _create_done_callback(self, gpu_index):
         def done_callback(cmd, success, exit_code):

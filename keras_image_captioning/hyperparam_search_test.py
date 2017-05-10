@@ -32,13 +32,13 @@ class TestHyperparamSearch(object):
     def test__init__(self, mocker):
         mocker.patch.object(HyperparamSearch, 'num_gpus',
                             mocker.PropertyMock(return_value=NUM_GPUS))
-        search = HyperparamSearch(training_label_prefix='test/hpsearch/norun',
+        search = HyperparamSearch(training_label_prefix='test/hpsearch/init1',
                                   dataset_name='flickr8k',
                                   epochs=EPOCHS)
         assert search.num_gpus == NUM_GPUS
 
     def test___init___with_num_gpus(self):
-        search = HyperparamSearch(training_label_prefix='test/hpsearch/norun',
+        search = HyperparamSearch(training_label_prefix='test/hpsearch/init2',
                                   dataset_name='flickr8k',
                                   epochs=EPOCHS,
                                   num_gpus=NUM_GPUS + 1)

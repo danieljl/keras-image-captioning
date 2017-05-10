@@ -28,17 +28,20 @@ class TestTraining(object):
 
         conf = conf._replace(epochs=None, time_limit=None)
         with pytest.raises(ValueError):
-            training.Training(TRAINING_LABEL, conf=conf)
+            training.Training(TRAINING_LABEL + '/init1', conf=conf)
 
         conf = conf._replace(epochs=2, time_limit=timedelta(minutes=2))
         with pytest.raises(ValueError):
-            training.Training(TRAINING_LABEL, conf=conf)
+            training.Training(TRAINING_LABEL + '/init2', conf=conf)
 
         conf = conf._replace(epochs=2, time_limit=None)
-        training.Training(TRAINING_LABEL, conf=conf)
+        training.Training(TRAINING_LABEL + '/init3', conf=conf)
+
+        with pytest.raises(ValueError):  # Duplicate training label
+            training.Training(TRAINING_LABEL + '/init3', conf=conf)
 
         conf = conf._replace(epochs=None, time_limit=timedelta(minutes=2))
-        train = training.Training(TRAINING_LABEL, conf=conf)
+        train = training.Training(TRAINING_LABEL + '/init4', conf=conf)
         assert train._epochs == sys.maxsize
 
     def test_run(self, mocker):
@@ -50,7 +53,7 @@ class TestTraining(object):
 
         conf = config.DefaultConfigBuilder().build_config()
         conf = conf._replace(epochs=2, time_limit=None, batch_size=2)
-        train = training.Training(TRAINING_LABEL, conf=conf)
+        train = training.Training(TRAINING_LABEL + '/run', conf=conf)
         train.run()
         assert logging_mock.call_count == 2
 
@@ -68,7 +71,7 @@ def test_main(mocker):
                          batch_size=2)
     config.write_to_file(conf, yaml_path)
 
-    train = training.main(training_label=TRAINING_LABEL,
+    train = training.main(training_label=TRAINING_LABEL + '/main',
                           config_file=yaml_path,
                           unit_test=True)
     assert train._config == conf
