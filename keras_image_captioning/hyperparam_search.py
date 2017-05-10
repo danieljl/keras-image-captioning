@@ -91,10 +91,6 @@ class HyperparamSearch(object):
 
                 self._remove_finished_commands()
 
-        # For now, the program won't reach this line since itertools.count()
-        # returns an infinite number generator. The code below is a reminder
-        # to wait running commands when in the future finite hyperparam search
-        # want to be implemented.
         self._wait_running_commands()
 
     def stop(self):
