@@ -59,6 +59,9 @@ class TestCaptionPreprocessor(object):
         assert (set([1, 2, 3, 4, 5]) ==
                 set(caption_prep._tokenizer.word_index.values()))
 
+        assert (set([1, 2, 3, 4, 5]) ==
+                set(caption_prep._word_of.keys()))
+
     def test_encode_captions(self, caption_prep):
         captions = ['keras', 'tensorflow', 'keras theano']
         caption_prep.fit_on_captions(captions)
@@ -75,7 +78,18 @@ class TestCaptionPreprocessor(object):
         assert results[-1] == results[-2]  # 'pytorch' skipped
 
     def test_decode_captions(self, caption_prep):
-        pass  # TODO
+        caption_prep._word_of = {1: 'one', 2: 'two', 3: 'three'}
+        # Label-encoded: [[2, 3, 1], [2, 1]]
+        captions_output = np.array([[[0, 1, 0],
+                                     [0, 0, 1],
+                                     [1, 0, 0],
+                                     [0, 0, 0]],
+                                    [[0, 1, 0],
+                                     [1, 0, 0],
+                                     [0, 0, 0],
+                                     [0, 0, 0]]])
+        result = caption_prep.decode_captions(captions_output)
+        assert result == ['two three one', 'two one' + ' one']
 
     def test_preprocess_batch(self, caption_prep):
         # The index starts from 1 so sequences_to_matrix needs a numpy array

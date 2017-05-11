@@ -47,23 +47,41 @@ class CaptionPreprocessor(object):
                                      active_config().rare_words_handling)
         self._words_min_occur = (words_min_occur or
                                  active_config().words_min_occur)
+        self._word_of = {}
 
     @property
     def vocab_size(self):
         return len(self._tokenizer.word_index)
 
     def fit_on_captions(self, captions_txt):
-        captions_txt = self._add_eos(captions_txt)
         # TODO Handle rare words
+        captions_txt = self._add_eos(captions_txt)
         self._tokenizer.fit_on_texts(captions_txt)
+        self._word_of = {i: w for w, i in self._tokenizer.word_index.items()}
 
     def encode_captions(self, captions_txt):
         captions_txt = self._add_eos(captions_txt)
         return self._tokenizer.texts_to_sequences(captions_txt)
 
-    def decode_captions(self, captions_encoded):
-        # TODO
-        raise NotImplementedError
+    def decode_captions(self, captions_output):
+        """
+        Args
+          captions_output: 3-d array returned by a model's prediction; it's the
+            same as captions_output returned by preprocess_batch
+        """
+        captions = captions_output[:, :-1, :]  # Discard the last word (dummy)
+        label_encoded = captions.argmax(axis=-1)
+
+        captions_str = []
+        for caption_i in range(label_encoded.shape[0]):
+            caption_str = []
+            for word_i in range(label_encoded.shape[1]):
+                label = label_encoded[caption_i, word_i]
+                label += 1  # Real label = label in model + 1
+                caption_str.append(self._word_of[label])
+            captions_str.append(' '.join(caption_str))
+
+        return captions_str
 
     def preprocess_batch(self, captions_label_encoded):
         captions = keras_seq.pad_sequences(captions_label_encoded,
