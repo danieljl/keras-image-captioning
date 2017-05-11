@@ -1,5 +1,7 @@
 import pytest
 
+from operator import attrgetter
+
 from . import datasets
 
 
@@ -15,6 +17,16 @@ class TestFlickr8kDataset(object):
                 endswith('2513260012_03d33305cf.jpg'))
         assert (flickr8k.training_set[0].caption_txt ==
                 'A black dog be run after a white dog in the snow .')
+
+    def test_training_set_differs_from_validation_set(self, flickr8k):
+        training_imgs = map(attrgetter('img_path'), flickr8k.training_set)
+        validation_imgs = map(attrgetter('img_path'), flickr8k.validation_set)
+
+        # Filenames only
+        training_imgs = [x.split('/')[-1] for x in training_imgs]
+        validation_imgs = [x.split('/')[-1] for x in validation_imgs]
+
+        assert not (set(training_imgs) & set(validation_imgs))
 
     def test_dataset_dir(self, flickr8k):
         path = flickr8k.dataset_dir
