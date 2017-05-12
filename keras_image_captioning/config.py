@@ -133,12 +133,12 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._lemmatize_caption = lambda: True
         self._rare_words_handling = lambda: 'nothing'
         self._words_min_occur = lambda: 1
+        self._bidirectional_rnn = lambda: False
 
         self._learning_rate = lambda: 10**uniform(-7, -1)
         self._embedding_size = lambda: 50 * randint(1, 10)
         self._rnn_output_size = lambda: 50 * randint(1, 10)
         self._dropout_rate = lambda: uniform(0, 1)
-        self._bidirectional_rnn = lambda: choice([True, False])
         self._rnn_type = lambda: choice(['lstm', 'gru'])
         self._rnn_layers = lambda: randint(1, 3)
         self._l1_reg = lambda: 10**uniform(-9, 1)
