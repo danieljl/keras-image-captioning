@@ -136,7 +136,7 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._bidirectional_rnn = lambda: False
         self._initializer = lambda: 'he_normal'
 
-        self._learning_rate = lambda: 10**uniform(-7, -1)
+        self._learning_rate = lambda: 10 ** uniform(-6, -2)
         self._dropout_rate = lambda: uniform(0, 1)
         self._l1_reg = lambda: 10**uniform(-9, 1)
         self._l2_reg = lambda: 10**uniform(-9, 1)
