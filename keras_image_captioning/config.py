@@ -141,8 +141,8 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._l1_reg = lambda: 10**uniform(-9, 1)
         self._l2_reg = lambda: 10**uniform(-9, 1)
 
-        self._embedding_size = lambda: 50 * randint(1, 10)
-        self._rnn_output_size = lambda: 50 * randint(1, 10)
+        self._embedding_size = lambda: int(2 ** uniform(6, 9))  # [64, 512]
+        self._rnn_output_size = lambda: int(2 ** uniform(6, 9))  # [64, 512]
         self._rnn_type = lambda: choice(['lstm', 'gru'])
         self._rnn_layers = lambda: randint(1, 3)
 
