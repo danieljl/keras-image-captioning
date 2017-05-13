@@ -147,6 +147,16 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._rnn_layers = lambda: randint(1, 3)
 
 
+class Coarse1RandomConfigBuilder(CoarseRandomConfigBuilder):
+    def __init__(self, fixed_config_keys):
+        super(Coarse1RandomConfigBuilder, self).__init__(fixed_config_keys)
+
+        self._embedding_size = lambda: 256
+        self._rnn_output_size = lambda: 256
+        self._rnn_type = lambda: 'lstm'
+        self._rnn_layers = lambda: 2
+
+
 class FileConfigBuilder(ConfigBuilderBase):
     def __init__(self, yaml_path):
         self._yaml_path = yaml_path
