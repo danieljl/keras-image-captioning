@@ -7,7 +7,8 @@ from . import io_utils
 from .config import active_config
 
 
-Datum = namedtuple('Datum', 'img_path caption_txt')
+Datum = namedtuple('Datum', 'img_filename img_path '
+                            'caption_txt all_captions_txt')
 
 
 class Dataset(object):
@@ -104,9 +105,12 @@ class Flickr8kDataset(Dataset):
         for img_filename in img_filenames:
             img_path = os.path.join(self.dataset_dir, self._IMG_DIRNAME,
                                     img_filename)
-            for caption_txt in self._captions_of[img_filename]:
-                dataset.append(Datum(img_path=img_path,
-                                     caption_txt=caption_txt))
+            all_captions_txt = self._captions_of[img_filename]
+            for caption_txt in all_captions_txt:
+                dataset.append(Datum(img_filename=img_filename,
+                                     img_path=img_path,
+                                     caption_txt=caption_txt,
+                                     all_captions_txt=all_captions_txt))
 
         return dataset
 
