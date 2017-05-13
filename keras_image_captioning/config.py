@@ -134,6 +134,7 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._rare_words_handling = lambda: 'nothing'
         self._words_min_occur = lambda: 1
         self._bidirectional_rnn = lambda: False
+        self._initializer = lambda: 'he_normal'
 
         self._learning_rate = lambda: 10**uniform(-7, -1)
         self._dropout_rate = lambda: uniform(0, 1)
@@ -144,8 +145,6 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._rnn_output_size = lambda: 50 * randint(1, 10)
         self._rnn_type = lambda: choice(['lstm', 'gru'])
         self._rnn_layers = lambda: randint(1, 3)
-        self._initializer = lambda: choice(['glorot_normal', 'glorot_uniform',
-                                            'he_normal', 'he_uniform'])
 
 
 class FileConfigBuilder(ConfigBuilderBase):
