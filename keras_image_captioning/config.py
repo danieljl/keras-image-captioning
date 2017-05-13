@@ -136,13 +136,14 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._bidirectional_rnn = lambda: False
 
         self._learning_rate = lambda: 10**uniform(-7, -1)
-        self._embedding_size = lambda: 50 * randint(1, 10)
-        self._rnn_output_size = lambda: 50 * randint(1, 10)
         self._dropout_rate = lambda: uniform(0, 1)
-        self._rnn_type = lambda: choice(['lstm', 'gru'])
-        self._rnn_layers = lambda: randint(1, 3)
         self._l1_reg = lambda: 10**uniform(-9, 1)
         self._l2_reg = lambda: 10**uniform(-9, 1)
+
+        self._embedding_size = lambda: 50 * randint(1, 10)
+        self._rnn_output_size = lambda: 50 * randint(1, 10)
+        self._rnn_type = lambda: choice(['lstm', 'gru'])
+        self._rnn_layers = lambda: randint(1, 3)
         self._initializer = lambda: choice(['glorot_normal', 'glorot_uniform',
                                             'he_normal', 'he_uniform'])
 
