@@ -8,7 +8,8 @@ from datetime import datetime
 
 
 def _path_from_here(path):
-    return os.path.join(os.path.dirname(__file__), path)
+    result = os.path.join(os.path.dirname(__file__), path)
+    return os.path.normpath(result)
 
 
 _VAR_ROOT_DIR = _path_from_here('../var/')

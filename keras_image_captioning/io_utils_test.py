@@ -2,7 +2,9 @@ from . import io_utils
 
 
 def test_path_from_var_dir():
-    assert io_utils.path_from_var_dir('something').endswith('var/something')
+    path = io_utils.path_from_var_dir('something')
+    assert path.endswith('var/something')
+    assert path.find('..') == -1
 
 
 def test_mkdir_p():
