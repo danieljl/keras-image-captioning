@@ -138,8 +138,8 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
 
         self._learning_rate = lambda: 10 ** uniform(-6, -2)
         self._dropout_rate = lambda: uniform(0, 1)
-        self._l1_reg = lambda: 10**uniform(-9, 1)
-        self._l2_reg = lambda: 10**uniform(-9, 1)
+        self._l1_reg = lambda: 10 ** uniform(-7, 0)
+        self._l2_reg = lambda: 10 ** uniform(-7, 0)
 
         self._embedding_size = lambda: int(2 ** uniform(6, 9))  # [64, 512]
         self._rnn_output_size = lambda: int(2 ** uniform(6, 9))  # [64, 512]
