@@ -9,7 +9,8 @@ from keras.callbacks import (CSVLogger, EarlyStopping, ModelCheckpoint,
 
 from . import config
 from . import io_utils
-from .callbacks import LogLearningRate, LogTimestamp, StopAfterTimedelta
+from .callbacks import (LogLearningRate, LogMetrics, LogTimestamp,
+                        StopAfterTimedelta)
 from .io_utils import logging
 from .dataset_providers import DatasetProvider
 from .models import ImageCaptioningModel
@@ -121,6 +122,7 @@ class Training(object):
     def _init_callbacks(self):
         log_lr = LogLearningRate()
         log_ts = LogTimestamp()
+        log_metrics = LogMetrics(self._dataset_provider)
 
         CSV_FILENAME = 'metrics-log.csv'
         self._csv_filepath = self._path_from_result_dir(CSV_FILENAME)
@@ -158,7 +160,9 @@ class Training(object):
 
         # TODO Add LearningRateScheduler. Is it still needed?
 
-        self._callbacks = [log_lr,  # Must be before model_checkpoint
+        self._callbacks = [log_lr,  # Must be before tensorboard
+                           log_metrics,  # Must be before model_checkpoint and
+                                         # tensorboard
                            model_checkpoint,
                            tensorboard,  # Must be before log_ts
                            log_ts,  # Must be before csv_logger

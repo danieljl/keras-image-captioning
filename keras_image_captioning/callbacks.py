@@ -1,7 +1,10 @@
+import numpy as np
+
 from datetime import datetime
 from keras import backend as K
 from keras.callbacks import Callback
 
+from .inference import BasicInference
 from .io_utils import logging
 
 
@@ -30,6 +33,23 @@ class LogTimestamp(Callback):
         return NotIterableStr(datetime.utcnow().isoformat(' '))
 
 
+class LogMetrics(Callback):
+    def __init__(self, dataset_provider):
+        super(LogMetrics, self).__init__()
+        self._dataset_provider = dataset_provider
+
+    def on_train_begin(self, logs):
+        # Initialization is here, not in __init__ because in there self.model
+        # is not initialized yet
+        self._inference = BasicInference(self.model, self._dataset_provider)
+
+    def on_epoch_end(self, epoch, logs):
+        logs.update({k: np.float32(v) for k, v
+                     in self._inference.evaluate_training_set().items()})
+        logs.update({'val_' + k: np.float32(v) for k, v
+                     in self._inference.evaluate_validation_set().items()})
+
+
 class StopAfterTimedelta(Callback):
     def __init__(self, timedelta, verbose=0):
         super(StopAfterTimedelta, self).__init__()
@@ -50,4 +70,4 @@ class StopAfterTimedelta(Callback):
     def on_train_end(self, logs):
         if self._stopped_epoch is not None and self._verbose > 0:
             logging('Epoch {}: stop after {}'.format(self._stopped_epoch,
-                                                         self._timedelta))
+                                                     self._timedelta))
