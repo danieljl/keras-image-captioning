@@ -1,7 +1,50 @@
 import numpy as np
+import pytest
 import tensorflow as tf
 
-from .metrics import categorical_accuracy_with_variable_timestep
+from .metrics import (BLEU, CIDEr, ROUGE,
+                      categorical_accuracy_with_variable_timestep)
+
+
+@pytest.fixture
+def id_to_prediction():
+    return {
+        0: 'a man and a woman are eating at the restaurant',
+        1: 'a boy play a basketball'
+    }
+
+
+@pytest.fixture
+def id_to_references():
+    return {
+        0: ['a man and a woman are eating at the restaurant'],
+        1: ['a boy is playing a basketball', 'boy plays basketball']
+    }
+
+
+class TestBLEU(object):
+    def test_calculate(self, id_to_prediction, id_to_references):
+        bleu = BLEU(n=4)
+        name_to_score = bleu.calculate(id_to_prediction, id_to_references)
+        assert len(name_to_score) == 4
+        assert all(isinstance(score, float)
+                   for score in name_to_score.values())
+
+
+class TestCIDEr(object):
+    def test_calculate(self, id_to_prediction, id_to_references):
+        cider = CIDEr()
+        name_to_score = cider.calculate(id_to_prediction, id_to_references)
+        assert all(isinstance(score, float)
+                   for score in name_to_score.values())
+
+
+class TestROUGE(object):
+    def test_calculate(self, id_to_prediction, id_to_references):
+        rouge = ROUGE()
+        name_to_score = rouge.calculate(id_to_prediction, id_to_references)
+        assert all(isinstance(score, float)
+                   for score in name_to_score.values())
 
 
 def test_categorical_accuracy_with_variable_timestep():
