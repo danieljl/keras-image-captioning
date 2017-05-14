@@ -48,16 +48,23 @@ class DatasetProvider(object):
     def training_results_dir(self):
         return self._dataset.training_results_dir
 
-    def training_set(self):
-        for batch in self._batch_generator(self._dataset.training_set):
+    @property
+    def caption_preprocessor(self):
+        return self._caption_preprocessor
+
+    def training_set(self, include_datum=False):
+        for batch in self._batch_generator(self._dataset.training_set,
+                                           include_datum):
             yield batch
 
-    def validation_set(self):
-        for batch in self._batch_generator(self._dataset.validation_set):
+    def validation_set(self, include_datum=False):
+        for batch in self._batch_generator(self._dataset.validation_set,
+                                           include_datum):
             yield batch
 
-    def testing_set(self):
-        for batch in self._batch_generator(self._dataset.testing_set):
+    def testing_set(self, include_datum=False):
+        for batch in self._batch_generator(self._dataset.testing_set,
+                                           include_datum):
             yield batch
 
     def _build(self):
@@ -65,7 +72,7 @@ class DatasetProvider(object):
         training_captions = map(attrgetter('caption_txt'), training_set)
         self._caption_preprocessor.fit_on_captions(training_captions)
 
-    def _batch_generator(self, datum_list):
+    def _batch_generator(self, datum_list, include_datum=False):
         # TODO Make it thread-safe. Currently only suitable for workers=1 in
         # fit_generator.
         datum_list = copy(datum_list)
@@ -75,12 +82,12 @@ class DatasetProvider(object):
             for datum in datum_list:
                 datum_batch.append(datum)
                 if len(datum_batch) >= self._batch_size:
-                    yield self._preprocess_batch(datum_batch)
+                    yield self._preprocess_batch(datum_batch, include_datum)
                     datum_batch = []
             if datum_batch:
-                yield self._preprocess_batch(datum_batch)
+                yield self._preprocess_batch(datum_batch, include_datum)
 
-    def _preprocess_batch(self, datum_batch):
+    def _preprocess_batch(self, datum_batch, include_datum=False):
         imgs_path = map(attrgetter('img_path'), datum_batch)
         captions_txt = map(attrgetter('caption_txt'), datum_batch)
 
@@ -92,4 +99,8 @@ class DatasetProvider(object):
 
         captions_input, captions_output = captions
         X, y = [imgs_input, captions_input], captions_output
-        return X, y
+
+        if include_datum:
+            return X, y, datum_batch
+        else:
+            return X, y

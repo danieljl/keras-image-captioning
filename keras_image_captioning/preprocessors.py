@@ -3,7 +3,7 @@ import numpy as np
 from keras.applications import inception_v3
 from keras.preprocessing import sequence as keras_seq
 from keras.preprocessing.image import img_to_array, load_img
-from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.text import Tokenizer, text_to_word_sequence
 
 from .config import active_config
 
@@ -63,7 +63,7 @@ class CaptionPreprocessor(object):
         captions_txt = self._add_eos(captions_txt)
         return self._tokenizer.texts_to_sequences(captions_txt)
 
-    def decode_captions(self, captions_output):
+    def decode_captions(self, captions_output, captions_output_expected=None):
         """
         Args
           captions_output: 3-d array returned by a model's prediction; it's the
@@ -71,17 +71,29 @@ class CaptionPreprocessor(object):
         """
         captions = captions_output[:, :-1, :]  # Discard the last word (dummy)
         label_encoded = captions.argmax(axis=-1)
+        num_batches, num_words = label_encoded.shape
+
+        if captions_output_expected is not None:
+            caption_lengths = self._caption_lengths(captions_output_expected)
+        else:
+            caption_lengths = [num_words] * num_batches
 
         captions_str = []
-        for caption_i in range(label_encoded.shape[0]):
+        for caption_i in range(num_batches):
             caption_str = []
-            for word_i in range(label_encoded.shape[1]):
+            for word_i in range(caption_lengths[caption_i]):
                 label = label_encoded[caption_i, word_i]
                 label += 1  # Real label = label in model + 1
                 caption_str.append(self._word_of[label])
             captions_str.append(' '.join(caption_str))
 
         return captions_str
+
+    def normalize_captions(self, captions_txt):
+        captions_txt = self._add_eos(captions_txt)
+        word_sequences = map(text_to_word_sequence, captions_txt)
+        result = map(' '.join, word_sequences)
+        return result
 
     def preprocess_batch(self, captions_label_encoded):
         captions = keras_seq.pad_sequences(captions_label_encoded,
@@ -109,3 +121,7 @@ class CaptionPreprocessor(object):
 
     def _add_eos(self, captions):
         return map(lambda x: x + ' ' + self.EOS_TOKEN, captions)
+
+    def _caption_lengths(self, captions_output):
+        one_hot_sum = captions_output.sum(axis=2)
+        return (one_hot_sum != 0).sum(axis=1)

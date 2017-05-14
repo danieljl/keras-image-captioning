@@ -91,6 +91,20 @@ class TestCaptionPreprocessor(object):
         result = caption_prep.decode_captions(captions_output)
         assert result == ['two three one', 'two one' + ' one']
 
+        result = caption_prep.decode_captions(captions_output, captions_output)
+        assert result == ['two three one', 'two one']
+
+    def test_normalize_captions(self, caption_prep):
+        captions_txt = [
+            'A man be lie on the ground , laugh , during a ball game .',
+            'a university of Miami football player # 25 .']
+        normalized_captions = caption_prep.normalize_captions(captions_txt)
+        eos = CaptionPreprocessor.EOS_TOKEN
+        assert normalized_captions == [
+            'a man be lie on the ground laugh during a ball game ' + eos,
+            'a university of miami football player 25 ' + eos
+        ]
+
     def test_preprocess_batch(self, caption_prep):
         # The index starts from 1 so sequences_to_matrix needs a numpy array
         # with a size of num_words = word_index + 1
@@ -116,3 +130,16 @@ class TestCaptionPreprocessor(object):
         results = caption_prep._add_eos(captions)
         eos = CaptionPreprocessor.EOS_TOKEN
         assert all(x.endswith(' ' + eos) for x in results)
+
+    def test__caption_lengths(self, caption_prep):
+        # Label-encoded: [[2, 3, 1], [2, 1]]
+        captions_output = np.array([[[0, 1, 0],
+                                     [0, 0, 1],
+                                     [1, 0, 0],
+                                     [0, 0, 0]],
+                                    [[0, 1, 0],
+                                     [1, 0, 0],
+                                     [0, 0, 0],
+                                     [0, 0, 0]]])
+        result = caption_prep._caption_lengths(captions_output)
+        print(result)

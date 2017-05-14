@@ -1,6 +1,7 @@
 import pytest
 
 from itertools import islice
+from operator import attrgetter
 from types import GeneratorType
 
 from .dataset_providers import DatasetProvider
@@ -13,7 +14,7 @@ class TestDatasetProvider(object):
 
     def test_training_set(self, dataset_provider, mocker):
         mocker.patch.object(dataset_provider, '_batch_generator',
-                            lambda _: range(5))
+                            lambda _, __: range(5))
         generator = dataset_provider.training_set()
         assert isinstance(generator, GeneratorType)
         assert list(generator) == range(5)
@@ -53,3 +54,13 @@ class TestDatasetProvider(object):
         assert imgs_input.shape[1:3] == image_preprocessor.IMAGE_SIZE
         assert captions_input.shape[1] == captions_output.shape[1] - 1
         assert captions_output.shape[2] == dataset_provider.vocab_size
+
+    def test__preprocess_batch_with_include_datum(self, dataset_provider):
+        batch_size = 8
+        batch = dataset_provider._dataset.training_set[:batch_size]
+        results = dataset_provider._preprocess_batch(batch, include_datum=True)
+        (imgs_input, captions_input), captions_output, datum_batch = results
+
+        all_captions_txt = map(attrgetter('all_captions_txt'), datum_batch)
+        assert len(all_captions_txt) == batch_size
+        assert all(len(captions) == 5 for captions in all_captions_txt)
