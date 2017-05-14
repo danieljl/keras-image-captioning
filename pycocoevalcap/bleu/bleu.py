@@ -20,7 +20,7 @@ class Bleu:
 
     def compute_score(self, gts, res):
 
-        assert(gts.keys() == res.keys())
+        assert(set(gts.keys()) == set(res.keys()))
         imgIds = gts.keys()
 
         bleu_scorer = BleuScorer(n=self._n)
