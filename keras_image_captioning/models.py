@@ -94,8 +94,6 @@ class ImageCaptioningModel(object):
         dense_input = BatchNormalization(axis=-1)(image_model.output)
         image_dense = Dense(units=self._embedding_size,
                             kernel_regularizer=self._regularizer,
-                            bias_regularizer=self._regularizer,
-                            activity_regularizer=self._regularizer,
                             kernel_initializer=self._initializer
                             )(dense_input)
         # Add timestep dimension
@@ -110,7 +108,6 @@ class ImageCaptioningModel(object):
                             input_dim=self._vocab_size,
                             output_dim=self._embedding_size,
                             embeddings_regularizer=self._regularizer,
-                            activity_regularizer=self._regularizer,
                             embeddings_initializer=self._initializer
                          )(sentence_input)
         return sentence_input, word_embedding
@@ -124,9 +121,6 @@ class ImageCaptioningModel(object):
                       dropout=self._dropout_rate,
                       recurrent_dropout=self._dropout_rate,
                       kernel_regularizer=self._regularizer,
-                      recurrent_regularizer=self._regularizer,
-                      bias_regularizer=self._regularizer,
-                      activity_regularizer=self._regularizer,
                       kernel_initializer=self._initializer,
                       implementation=2)
             rnn = Bidirectional(rnn) if self._bidirectional_rnn else rnn
