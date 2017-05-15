@@ -34,20 +34,29 @@ class LogTimestamp(Callback):
 
 
 class LogMetrics(Callback):
-    def __init__(self, dataset_provider):
+    def __init__(self, dataset_provider, period=1):
         super(LogMetrics, self).__init__()
         self._dataset_provider = dataset_provider
+        self._period = period
 
     def on_train_begin(self, logs):
         # Initialization is here, not in __init__ because in there self.model
         # is not initialized yet
         self._inference = BasicInference(self.model, self._dataset_provider)
+        self._old_logs = {}
 
     def on_epoch_end(self, epoch, logs):
-        logs.update({k: np.float32(v) for k, v
-                     in self._inference.evaluate_training_set().items()})
-        logs.update({'val_' + k: np.float32(v) for k, v
-                     in self._inference.evaluate_validation_set().items()})
+        if epoch % self._period != 0:
+            logs.update(self._old_logs)
+            return
+
+        new_logs = {}
+        new_logs.update({k: np.float32(v) for k, v
+                         in self._inference.evaluate_training_set().items()})
+        new_logs.update({'val_' + k: np.float32(v) for k, v
+                         in self._inference.evaluate_validation_set().items()})
+        logs.update(new_logs)
+        self._old_logs = new_logs
 
 
 class StopAfterTimedelta(Callback):

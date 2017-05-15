@@ -122,7 +122,7 @@ class Training(object):
     def _init_callbacks(self):
         log_lr = LogLearningRate()
         log_ts = LogTimestamp()
-        log_metrics = LogMetrics(self._dataset_provider)
+        log_metrics = LogMetrics(self._dataset_provider, period=4)
 
         CSV_FILENAME = 'metrics-log.csv'
         self._csv_filepath = self._path_from_result_dir(CSV_FILENAME)
