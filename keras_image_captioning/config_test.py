@@ -45,6 +45,12 @@ class TestCoarseRandomConfigBuilder(object):
         conf = builder.build_config()
         assert conf.embedding_size == 64
 
+        fixed_config_keys = dict(dataset_name='flickr8k',
+                                 time_limit=timedelta(minutes=1))
+        builder = config.CoarseRandomConfigBuilder(fixed_config_keys)
+        conf = builder.build_config()
+        assert conf.embedding_size == conf.rnn_output_size
+
 
 class TestFileConfigBuilder(object):
     def test_build_config(self):

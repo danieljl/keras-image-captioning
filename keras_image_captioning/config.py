@@ -146,6 +146,13 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._rnn_type = lambda: choice(['lstm', 'gru'])
         self._rnn_layers = lambda: randint(1, 3)
 
+    def build_config(self):
+        size = self._embedding_size()
+        network_size = dict(embedding_size=size, rnn_output_size=size)
+        network_size.update(self._fixed_config_keys)
+        self._fixed_config_keys = network_size
+        return super(CoarseRandomConfigBuilder, self).build_config()
+
 
 class Coarse1RandomConfigBuilder(CoarseRandomConfigBuilder):
     def __init__(self, fixed_config_keys):
