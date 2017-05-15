@@ -20,7 +20,8 @@ class TestDatasetProvider(object):
         assert list(generator) == range(5)
 
     def test__batch_generator(self, dataset_provider, mocker):
-        mocker.patch.object(dataset_provider, '_preprocess_batch', lambda x: x)
+        mocker.patch.object(dataset_provider, '_preprocess_batch',
+                            lambda x, _: x)
 
         datum_list = range(10)
         generator = dataset_provider._batch_generator(datum_list)
