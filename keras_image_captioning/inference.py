@@ -1,7 +1,14 @@
+from keras.engine.training import GeneratorEnqueuer
+from time import sleep
+
 from .metrics import BLEU, CIDEr, ROUGE
 
 
 class BasicInference(object):
+    _MAX_Q_SIZE = 10
+    _WORKERS = 1
+    _WAIT_TIME = 0.01
+
     def __init__(self, keras_model, dataset_provider):
         self._model = keras_model
         self._dataset_provider = dataset_provider
@@ -37,16 +44,29 @@ class BasicInference(object):
                  steps_per_epoch,
                  include_datum=True):
         data_generator = data_generator_function(include_datum=True)
+        enqueuer = GeneratorEnqueuer(data_generator, pickle_safe=False)
+        enqueuer.start(workers=self._WORKERS, max_q_size=self._MAX_Q_SIZE)
+
         caption_results = []
         datum_results = []
         for _ in range(steps_per_epoch):
-            X, y, datum_batch = next(data_generator)
+            generator_output = None
+            while enqueuer.is_running():
+                if not enqueuer.queue.empty():
+                    generator_output = enqueuer.queue.get()
+                    break
+                else:
+                    sleep(self._WAIT_TIME)
+
+            X, y, datum_batch = generator_output
             captions_pred = self._model.predict_on_batch(X)
             captions_pred_str = self._preprocessor.decode_captions(
                     captions_output=captions_pred,
                     captions_output_expected=y)
             caption_results += captions_pred_str
             datum_results += datum_batch
+
+        enqueuer.stop()
 
         if include_datum:
             return zip(caption_results, datum_results)
