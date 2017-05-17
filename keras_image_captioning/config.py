@@ -97,6 +97,7 @@ class RandomConfigBuilder(ConfigBuilderBase):
         self._fixed_config_keys.setdefault('time_limit', None)
 
     def build_config(self):
+        network_size = self._embedding_size()
         config_dict = dict(
             batch_size=self._batch_size(),
             reduce_lr_factor=self._reduce_lr_factor(),
@@ -107,8 +108,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
             words_min_occur=self._words_min_occur(),
             learning_rate=self._learning_rate(),
             vocab_size=None,
-            embedding_size=self._embedding_size(),
-            rnn_output_size=self._rnn_output_size(),
+            embedding_size=network_size,
+            rnn_output_size=network_size,
             dropout_rate=self._dropout_rate(),
             bidirectional_rnn=self._bidirectional_rnn(),
             rnn_type=self._rnn_type(),
@@ -145,13 +146,6 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._rnn_output_size = lambda: int(2 ** uniform(6, 9))  # [64, 512]
         self._rnn_type = lambda: choice(['lstm', 'gru'])
         self._rnn_layers = lambda: randint(1, 5)
-
-    def build_config(self):
-        size = self._embedding_size()
-        network_size = dict(embedding_size=size, rnn_output_size=size)
-        network_size.update(self._fixed_config_keys)
-        self._fixed_config_keys = network_size
-        return super(CoarseRandomConfigBuilder, self).build_config()
 
 
 class Coarse1RandomConfigBuilder(CoarseRandomConfigBuilder):
