@@ -164,6 +164,17 @@ class Coarse1RandomConfigBuilder(CoarseRandomConfigBuilder):
         self._rnn_layers = lambda: 2
 
 
+class Coarse2RandomConfigBuilder(CoarseRandomConfigBuilder):
+    def __init__(self, fixed_config_keys):
+        super(Coarse2RandomConfigBuilder, self).__init__(fixed_config_keys)
+
+        # Values from hpsearch/07/0003
+        self._learning_rate = lambda: 1.656235e-03
+        self._dropout_rate = lambda: 8.887184e-02
+        self._l1_reg = lambda: 2.971412e-07
+        self._l2_reg = lambda: 2.816212e-05
+
+
 class FileConfigBuilder(ConfigBuilderBase):
     def __init__(self, yaml_path):
         self._yaml_path = yaml_path
