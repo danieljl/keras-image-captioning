@@ -169,6 +169,34 @@ class Coarse2RandomConfigBuilder(CoarseRandomConfigBuilder):
         self._l2_reg = lambda: 2.816212e-05
 
 
+class FineRandomConfigBuilder(CoarseRandomConfigBuilder):
+    def __init__(self, fixed_config_keys):
+        super(FineRandomConfigBuilder, self).__init__(fixed_config_keys)
+
+        self._early_stopping_patience = lambda: 6
+
+        self._learning_rate = lambda: 10 ** uniform(-4, -2)
+        self._dropout_rate = lambda: uniform(0, 0.75)
+        self._l1_reg = lambda: 10 ** uniform(-8, -4)
+        self._l2_reg = lambda: 10 ** uniform(-8, -4)
+
+        self._embedding_size = lambda: int(2 ** uniform(7, 8))  # [128, 256]
+        self._rnn_output_size = lambda: int(2 ** uniform(7, 8))  # [128, 256]
+        self._rnn_type = lambda: 'lstm'
+        self._rnn_layers = lambda: randint(1, 3)
+
+
+class Fine1RandomConfigBuilder(FineRandomConfigBuilder):
+    def __init__(self, fixed_config_keys):
+        super(Fine1RandomConfigBuilder, self).__init__(fixed_config_keys)
+
+        # Values from hpsearch/08/0023
+        self._embedding_size = lambda: 135
+        self._rnn_output_size = lambda: 135
+        self._rnn_type = lambda: 'lstm'
+        self._rnn_layers = lambda: 3
+
+
 class FileConfigBuilder(ConfigBuilderBase):
     def __init__(self, yaml_path):
         self._yaml_path = yaml_path
