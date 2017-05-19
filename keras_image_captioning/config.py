@@ -169,6 +169,18 @@ class Coarse2RandomConfigBuilder(CoarseRandomConfigBuilder):
         self._l2_reg = lambda: 2.816212e-05
 
 
+class Coarse3RandomConfigBuilder(CoarseRandomConfigBuilder):
+    def __init__(self, fixed_config_keys):
+        super(Coarse3RandomConfigBuilder, self).__init__(fixed_config_keys)
+
+        self._learning_rate = lambda: 10 ** uniform(-6, -1)
+
+        self._embedding_size = lambda: 512
+        self._rnn_output_size = lambda: 512
+        self._rnn_type = lambda: 'lstm'
+        self._rnn_layers = lambda: randint(1, 2)
+
+
 class FineRandomConfigBuilder(CoarseRandomConfigBuilder):
     def __init__(self, fixed_config_keys):
         super(FineRandomConfigBuilder, self).__init__(fixed_config_keys)
