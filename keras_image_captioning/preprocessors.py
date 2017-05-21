@@ -54,7 +54,7 @@ class CaptionPreprocessor(object):
         return len(self._tokenizer.word_index)
 
     def fit_on_captions(self, captions_txt):
-        # TODO Handle rare words
+        captions_txt = self._handle_rare_words(captions_txt)
         captions_txt = self._add_eos(captions_txt)
         self._tokenizer.fit_on_texts(captions_txt)
         self._word_of = {i: w for w, i in self._tokenizer.word_index.items()}
@@ -118,6 +118,24 @@ class CaptionPreprocessor(object):
         captions_input = captions_decreased
         captions_output = captions_one_hot_shifted
         return captions_input, captions_output
+
+    def _handle_rare_words(self, captions):
+        if self._rare_words_handling == 'nothing':
+            return captions
+        elif self._rare_words_handling == 'discard':
+            tokenizer = Tokenizer()
+            tokenizer.fit_on_texts(captions)
+            new_captions = []
+            for caption in captions:
+                words = text_to_word_sequence(caption)
+                new_words = [w for w in words
+                             if tokenizer.word_counts.get(w, 0) >=
+                             self._words_min_occur]
+                new_captions.append(' '.join(new_words))
+            return new_captions
+
+        raise NotImplementedError('rare_words_handling={} is not implemented '
+                                  'yet!'.format(self._rare_words_handling))
 
     def _add_eos(self, captions):
         return map(lambda x: x + ' ' + self.EOS_TOKEN, captions)

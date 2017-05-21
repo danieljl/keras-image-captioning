@@ -62,6 +62,15 @@ class TestCaptionPreprocessor(object):
         assert (set([1, 2, 3, 4, 5]) ==
                 set(caption_prep._word_of.keys()))
 
+    def test_fit_on_captions_with_handle_rare_words_discard(self):
+        caption_prep = CaptionPreprocessor(rare_words_handling='discard',
+                                           words_min_occur=2)
+        captions = ['keras', 'keras tensorflow', 'tensorflow deep learning',
+                    'keras theano deep learning']
+        caption_prep.fit_on_captions(captions)
+        assert 'theano' not in caption_prep._tokenizer.word_index
+        assert 'theano' not in caption_prep._word_of.values()
+
     def test_encode_captions(self, caption_prep):
         captions = ['keras', 'tensorflow', 'keras theano']
         caption_prep.fit_on_captions(captions)
