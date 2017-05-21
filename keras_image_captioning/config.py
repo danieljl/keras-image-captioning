@@ -209,6 +209,17 @@ class Fine1RandomConfigBuilder(FineRandomConfigBuilder):
         self._rnn_layers = lambda: 3
 
 
+class FinerRandomConfigBuilder(FineRandomConfigBuilder):
+    def __init__(self, fixed_config_keys):
+        super(FinerRandomConfigBuilder, self).__init__(fixed_config_keys)
+
+        self._dropout_rate = lambda: uniform(0, 0.3)
+        self._l1_reg = lambda: 10 ** uniform(-8, -5)
+        self._l2_reg = lambda: 10 ** uniform(-7, -4)
+
+        self._rnn_layers = lambda: randint(2, 3)
+
+
 class FileConfigBuilder(ConfigBuilderBase):
     def __init__(self, yaml_path):
         self._yaml_path = yaml_path
