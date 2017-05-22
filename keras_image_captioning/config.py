@@ -129,6 +129,22 @@ class Predefined1ConfigBuilder(PredefinedConfigBuilder):
         super(Predefined1ConfigBuilder, self).__init__(configs)
 
 
+class Predefined2ConfigBuilder(PredefinedConfigBuilder):
+    def __init__(self):
+        base_config = BEST_CONFIGS['hpsearch/12-finer/0013']
+        base_config = base_config._replace(early_stopping_patience=sys.maxsize,
+                                           epochs=41)
+
+        configs = []
+        for words_min_occur in range(1, 5):
+            configs += [base_config._replace(rare_words_handling='discard',
+                                             words_min_occur=words_min_occur),
+                        base_config._replace(rare_words_handling='discard',
+                                             words_min_occur=words_min_occur)]
+
+        super(Predefined2ConfigBuilder, self).__init__(configs)
+
+
 class RandomConfigBuilder(ConfigBuilderBase):
     def __init__(self, fixed_config_keys):
         """
