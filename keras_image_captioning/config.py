@@ -294,11 +294,6 @@ def active_config(new_active_config=None):
 
 
 def init_vocab_size(vocab_size):
-    if vocab_size is None:
-        raise ValueError('vocab_size cannot be None!')
-    if _active_config.vocab_size:
-        raise RuntimeError('vocab_size has been initialized before!')
-
     global _active_config
     _active_config = _active_config._replace(vocab_size=vocab_size)
 
