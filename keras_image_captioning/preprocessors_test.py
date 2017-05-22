@@ -45,22 +45,21 @@ class TestCaptionPreprocessor(object):
 
         captions = ['keras', 'tensorflow', 'deep learning']
         caption_prep.fit_on_captions(captions)
-        assert caption_prep.vocab_size == 4 + 2  # plus <sos> and <eos>
+        assert caption_prep.vocab_size == 4 + 1  # plus <eos>
 
     def test_fit_on_captions(self, caption_prep):
         captions = ['Keras', 'TensorFlow', 'deep learning: keras']
         caption_prep.fit_on_captions(captions)
 
-        sos = CaptionPreprocessor.SOS_TOKEN
         eos = CaptionPreprocessor.EOS_TOKEN
-        assert (set(['keras', 'tensorflow', 'deep', 'learning', sos, eos]) ==
+        assert (set(['keras', 'tensorflow', 'deep', 'learning', eos]) ==
                 set(caption_prep._tokenizer.word_index.keys()))
 
         # Index starts from 1
-        assert (set([1, 2, 3, 4, 5, 6]) ==
+        assert (set([1, 2, 3, 4, 5]) ==
                 set(caption_prep._tokenizer.word_index.values()))
 
-        assert (set([1, 2, 3, 4, 5, 6]) ==
+        assert (set([1, 2, 3, 4, 5]) ==
                 set(caption_prep._word_of.keys()))
 
     def test_fit_on_captions_with_handle_rare_words_discard(self):
@@ -79,7 +78,7 @@ class TestCaptionPreprocessor(object):
         results = caption_prep.encode_captions(captions)
         assert type(results[0]) == list
         assert type(results[0][0]) == int
-        assert map(len, results) == [3, 3, 4]  # plus <sos> and <eos>
+        assert map(len, results) == [2, 2, 3]  # plus <eos>
 
         # The only unseen word is 'pytorch'. 'tensorflow' and 'TensorFlow'
         # should be considered the same word.
@@ -90,13 +89,11 @@ class TestCaptionPreprocessor(object):
     def test_decode_captions(self, caption_prep):
         caption_prep._word_of = {1: 'one', 2: 'two', 3: 'three'}
         # Label-encoded: [[2, 3, 1], [2, 1]]
-        captions_output = np.array([[[0, 0, 0],
-                                     [0, 1, 0],
+        captions_output = np.array([[[0, 1, 0],
                                      [0, 0, 1],
                                      [1, 0, 0],
                                      [0, 0, 0]],
-                                    [[0, 0, 0],
-                                     [0, 1, 0],
+                                    [[0, 1, 0],
                                      [1, 0, 0],
                                      [0, 0, 0],
                                      [0, 0, 0]]])
@@ -111,11 +108,10 @@ class TestCaptionPreprocessor(object):
             'A man be lie on the ground , laugh , during a ball game .',
             'a university of Miami football player # 25 .']
         normalized_captions = caption_prep.normalize_captions(captions_txt)
-        sos = CaptionPreprocessor.SOS_TOKEN
         eos = CaptionPreprocessor.EOS_TOKEN
         assert normalized_captions == [
-            sos + ' a man be lie on the ground laugh during a ball game ' + eos,
-            sos + ' a university of miami football player 25 ' + eos
+            'a man be lie on the ground laugh during a ball game ' + eos,
+            'a university of miami football player 25 ' + eos
         ]
 
     def test_preprocess_batch(self, caption_prep):
@@ -124,26 +120,24 @@ class TestCaptionPreprocessor(object):
         caption_prep._tokenizer.num_words = 3 + 1
         captions_label_encoded = [[2, 3, 1], [2, 1]]
         captions_input_expected = np.array([[1, 2, 0], [1, 0, 0]])
-        captions_output_expected = np.array([[[0, 0, 0],    # dummy 1, from 1
-                                              [0, 0, 1],    # from 2
-                                              [1, 0, 0],    # from 0
-                                              [0, 0, 0]],   # dummy 2
-                                             [[0, 0, 0],    # dummy 1, from 1
-                                              [1, 0, 0],    # from 0
-                                              [0, 0, 0],    # padding
-                                              [0, 0, 0]]])  # dummy 2
+        captions_output_expected = np.array([[[0, 1, 0],
+                                              [0, 0, 1],
+                                              [1, 0, 0],
+                                              [0, 0, 0]],
+                                             [[0, 1, 0],
+                                              [1, 0, 0],
+                                              [0, 0, 0],
+                                              [0, 0, 0]]])
 
         results = caption_prep.preprocess_batch(captions_label_encoded)
         captions_input, captions_output = results
         np.testing.assert_array_equal(captions_input, captions_input_expected)
         np.testing.assert_array_equal(captions_output, captions_output_expected)
 
-    def test__add_sos_and_eos(self, caption_prep):
+    def test__add_eos(self, caption_prep):
         captions = ['keras', 'tensorflow pytorch']
-        results = caption_prep._add_sos_and_eos(captions)
-        sos = CaptionPreprocessor.SOS_TOKEN
+        results = caption_prep._add_eos(captions)
         eos = CaptionPreprocessor.EOS_TOKEN
-        assert all(x.startswith(sos + ' ') for x in results)
         assert all(x.endswith(' ' + eos) for x in results)
 
     def test__caption_lengths(self, caption_prep):
@@ -157,4 +151,4 @@ class TestCaptionPreprocessor(object):
                                      [0, 0, 0],
                                      [0, 0, 0]]])
         result = caption_prep._caption_lengths(captions_output)
-        np.testing.assert_array_equal(result, np.array([3, 2]))
+        print(result)

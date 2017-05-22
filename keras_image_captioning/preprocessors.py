@@ -32,8 +32,7 @@ class ImagePreprocessor(object):
 
 
 class CaptionPreprocessor(object):
-    SOS_TOKEN = 'qstartq'
-    EOS_TOKEN = 'qendq'
+    EOS_TOKEN = 'eos'
 
     def __init__(self, rare_words_handling=None, words_min_occur=None):
         """
@@ -56,12 +55,12 @@ class CaptionPreprocessor(object):
 
     def fit_on_captions(self, captions_txt):
         captions_txt = self._handle_rare_words(captions_txt)
-        captions_txt = self._add_sos_and_eos(captions_txt)
+        captions_txt = self._add_eos(captions_txt)
         self._tokenizer.fit_on_texts(captions_txt)
         self._word_of = {i: w for w, i in self._tokenizer.word_index.items()}
 
     def encode_captions(self, captions_txt):
-        captions_txt = self._add_sos_and_eos(captions_txt)
+        captions_txt = self._add_eos(captions_txt)
         return self._tokenizer.texts_to_sequences(captions_txt)
 
     def decode_captions(self, captions_output, captions_output_expected=None):
@@ -70,8 +69,7 @@ class CaptionPreprocessor(object):
           captions_output: 3-d array returned by a model's prediction; it's the
             same as captions_output returned by preprocess_batch
         """
-        # Discard the first word and the last word (dummies)
-        captions = captions_output[:, 1:-1, :]
+        captions = captions_output[:, :-1, :]  # Discard the last word (dummy)
         label_encoded = captions.argmax(axis=-1)
         num_batches, num_words = label_encoded.shape
 
@@ -92,7 +90,7 @@ class CaptionPreprocessor(object):
         return captions_str
 
     def normalize_captions(self, captions_txt):
-        captions_txt = self._add_sos_and_eos(captions_txt)
+        captions_txt = self._add_eos(captions_txt)
         word_sequences = map(text_to_word_sequence, captions_txt)
         result = map(' '.join, word_sequences)
         return result
@@ -108,10 +106,6 @@ class CaptionPreprocessor(object):
         captions_one_hot = map(self._tokenizer.sequences_to_matrix,
                                np.expand_dims(captions_extended1, -1))
         captions_one_hot = np.array(captions_one_hot, dtype='int')
-
-        # Encode the first word (<sos>) to all zeros because we don't want it
-        # contributing the loss.
-        captions_one_hot[:, 0, :] = 0
 
         # Decrease/shift word index by 1.
         # Shifting `captions_one_hot` makes the padding word
@@ -143,10 +137,8 @@ class CaptionPreprocessor(object):
         raise NotImplementedError('rare_words_handling={} is not implemented '
                                   'yet!'.format(self._rare_words_handling))
 
-    def _add_sos_and_eos(self, captions):
-        return map(lambda x: '{} {} {}'.format(self.SOS_TOKEN, x,
-                                               self.EOS_TOKEN),
-                   captions)
+    def _add_eos(self, captions):
+        return map(lambda x: x + ' ' + self.EOS_TOKEN, captions)
 
     def _caption_lengths(self, captions_output):
         one_hot_sum = captions_output.sum(axis=2)
