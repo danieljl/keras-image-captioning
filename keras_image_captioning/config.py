@@ -1,3 +1,4 @@
+import itertools
 import yaml
 import sys
 
@@ -76,6 +77,14 @@ class DefaultConfigBuilder(ConfigBuilderBase):
                       l1_reg=0.0,
                       l2_reg=0.0,
                       initializer='glorot_uniform')
+
+
+class PredefinedConfigBuilder(ConfigBuilderBase):
+    def __init__(self, predefined_configs):
+        self._predefined_configs = itertools.cycle(predefined_configs)
+
+    def build_config(self):
+        return next(self._predefined_configs)
 
 
 class RandomConfigBuilder(ConfigBuilderBase):

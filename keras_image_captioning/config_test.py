@@ -20,6 +20,13 @@ class TestDefaultConfigBuilder(object):
         assert conf.vocab_size is None
 
 
+class TestPredefinedConfigBuilder(object):
+    def test_build_config(self):
+        builder = config.PredefinedConfigBuilder([1, 3, 2])
+        result = [builder.build_config() for _ in range(7)]
+        assert result == [1, 3, 2, 1, 3, 2, 1]
+
+
 class TestCoarseRandomConfigBuilder(object):
     def test_build_config_with_no_dataset_name(self):
         fixed_config_keys = {}
