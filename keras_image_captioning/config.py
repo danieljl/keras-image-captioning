@@ -2,7 +2,7 @@ import itertools
 import yaml
 import sys
 
-from collections import namedtuple
+from collections import OrderedDict, namedtuple
 from datetime import timedelta
 from random import choice, randint, uniform
 
@@ -38,6 +38,31 @@ Config = namedtuple('Config', '''
 
     initializer
 ''')
+
+BEST_CONFIGS = OrderedDict([
+    ('hpsearch/12-finer/0013',
+     Config(batch_size=32,
+            bidirectional_rnn=False,
+            dataset_name='flickr8k',
+            dropout_rate=0.13077696459186092,
+            early_stopping_patience=6,
+            embedding_size=226,
+            epochs=21,
+            initializer='he_normal',
+            l1_reg=8.831598074868035e-08,
+            l2_reg=1.3722161194141783e-07,
+            learning_rate=0.0007725907034140148,
+            lemmatize_caption=True,
+            rare_words_handling='nothing',
+            reduce_lr_factor=0.999999,
+            reduce_lr_patience=9223372036854775807,
+            rnn_layers=3,
+            rnn_output_size=226,
+            rnn_type='lstm',
+            time_limit=None,
+            vocab_size=5578,
+            words_min_occur=1))
+])
 
 
 class ConfigBuilderBase(object):
@@ -85,6 +110,23 @@ class PredefinedConfigBuilder(ConfigBuilderBase):
 
     def build_config(self):
         return next(self._predefined_configs)
+
+
+class Predefined1ConfigBuilder(PredefinedConfigBuilder):
+    def __init__(self):
+        base_config = BEST_CONFIGS['hpsearch/12-finer/0013']
+        base_config = base_config._replace(early_stopping_patience=sys.maxsize,
+                                           epochs=21)
+
+        configs = []
+        configs += [base_config]
+        configs += [base_config._replace(lemmatize_caption=False)]
+        configs += [base_config._replace(initializer='glorot_uniform')]
+        configs += [base_config._replace(rare_words_handling='discard',
+                                         words_min_occur=x)
+                    for x in range(1, 6)]
+
+        super(Predefined1ConfigBuilder, self).__init__(configs)
 
 
 class RandomConfigBuilder(ConfigBuilderBase):

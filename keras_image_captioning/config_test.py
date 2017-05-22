@@ -27,6 +27,13 @@ class TestPredefinedConfigBuilder(object):
         assert result == [1, 3, 2, 1, 3, 2, 1]
 
 
+class TestPredefined1ConfigBuilder(object):
+    def test_build_config(self):
+        builder = config.Predefined1ConfigBuilder()
+        result = [builder.build_config() for _ in range(9)]
+        assert result[0] == result[-1]
+
+
 class TestCoarseRandomConfigBuilder(object):
     def test_build_config_with_no_dataset_name(self):
         fixed_config_keys = {}
