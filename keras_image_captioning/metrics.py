@@ -52,8 +52,10 @@ def categorical_accuracy_with_variable_timestep(y_true, y_pred):
     # Actually discarding is not needed if the dummy is an all-zeros array
     # (It is indeed encoded in an all-zeros array by
     # CaptionPreprocessing.preprocess_batch)
-    y_true = y_true[:, :-1, :]  # Discard the last timestep/word (dummy)
-    y_pred = y_pred[:, :-1, :]  # Discard the last timestep/word (dummy)
+
+    # Discard the first word and the last word (dummies)
+    y_true = y_true[:, 1:-1, :]
+    y_pred = y_pred[:, 1:-1, :]
 
     # Flatten the timestep dimension
     shape = tf.shape(y_true)

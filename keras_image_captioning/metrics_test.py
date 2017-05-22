@@ -52,11 +52,11 @@ def test_categorical_accuracy_with_variable_timestep():
 
     # Label-encoded: [[2, 3, 1], [2, 1]] -> [[1, 2, 0], [1, 0, 0]]
     # The additional [0, 0, 0] at the last for each batch is the dummy word
-    y_true_np = np.array([[[0, 1, 0],
+    y_true_np = np.array([[[0, 0, 0],
                            [0, 0, 1],
                            [1, 0, 0],
                            [0, 0, 0]],
-                          [[0, 1, 0],
+                          [[0, 0, 0],
                            [1, 0, 0],
                            [0, 0, 0],
                            [0, 0, 0]]])
@@ -66,15 +66,23 @@ def test_categorical_accuracy_with_variable_timestep():
     # Confirm the accuracy value
     y_true_np = y_true_np.copy()
     y_pred_np = y_true_np.copy()
-    y_pred_np[0, 0] = np.array([1, 0, 0])  # from [0, 1, 0]
+    y_pred_np[0, 1] = np.array([1, 0, 0])  # from [0, 0, 1]
     y_pred_np[1, 1] = np.array([0, 0, 1])  # from [1, 0, 0]
-    _assert_accuracy(0.6, y_true_np, y_pred_np)
+    # The only correct one is y_pred_np[0, 2]
+    _assert_accuracy(1.0 / 3.0, y_true_np, y_pred_np)
 
     # Confirm that last timestep/word (dummy) is discarded
     y_true_np = y_true_np.copy()
     y_pred_np = y_true_np.copy()
     y_true_np[:, -1, :] = np.array([[1, 0, 0], [0, 1, 0]])
     y_pred_np[:, -1, :] = np.array([[0, 0, 1], [1, 0, 0]])
+    _assert_accuracy(1.0, y_true_np, y_pred_np)
+
+    # Confirm that first timestep/word (dummy) is discarded
+    y_true_np = y_true_np.copy()
+    y_pred_np = y_true_np.copy()
+    y_true_np[:, 0, :] = np.array([[1, 0, 0], [0, 1, 0]])
+    y_pred_np[:, 0, :] = np.array([[0, 0, 1], [1, 0, 0]])
     _assert_accuracy(1.0, y_true_np, y_pred_np)
 
     # Confirm that the padding words don't contribute to the accuracy

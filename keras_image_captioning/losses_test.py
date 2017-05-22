@@ -15,23 +15,37 @@ def test_categorical_crossentropy_from_logits(session):
     shape = (batch, timestep, vocab_size)
     # tf.random_normal is not used because every executing Session.run,
     # the value changes.
-    y_true = tf.constant(np.random.normal(size=shape))
-    y_pred = tf.constant(np.random.normal(size=shape))
+    y_true_np = np.random.normal(size=shape)
+    y_pred_np = np.random.normal(size=shape)
+    y_true = tf.constant(y_true_np)
+    y_pred = tf.constant(y_pred_np)
 
     # Confirm the shape
     result = categorical_crossentropy_from_logits(y_true, y_pred)
     loss = session.run(result)
-    assert loss.shape == (batch, timestep - 1)
+    assert loss.shape == (batch, timestep - 2)  # The dummies are excluded
 
     # Confirm that the last timestep/word (dummy) is discarded
-
-    y_true_np = session.run(y_true)
-    y_pred_np = session.run(y_pred)
 
     y_true_np_changed = y_true_np.copy()
     y_pred_np_changed = y_pred_np.copy()
     y_true_np_changed[:, -1, :] = np.random.normal(size=(batch, vocab_size))
     y_pred_np_changed[:, -1, :] = np.random.normal(size=(batch, vocab_size))
+
+    y_true_changed = tf.constant(y_true_np_changed)
+    y_pred_changed = tf.constant(y_pred_np_changed)
+
+    result = categorical_crossentropy_from_logits(y_true_changed,
+                                                  y_pred_changed)
+    loss_changed = session.run(result)
+    np.testing.assert_array_almost_equal(loss, loss_changed)
+
+    # Confirm that the first timestep/word (dummy) is discarded
+
+    y_true_np_changed = y_true_np.copy()
+    y_pred_np_changed = y_pred_np.copy()
+    y_true_np_changed[:, 0, :] = np.random.normal(size=(batch, vocab_size))
+    y_pred_np_changed[:, 0, :] = np.random.normal(size=(batch, vocab_size))
 
     y_true_changed = tf.constant(y_true_np_changed)
     y_pred_changed = tf.constant(y_pred_np_changed)
