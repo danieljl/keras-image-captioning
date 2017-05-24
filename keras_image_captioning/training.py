@@ -11,6 +11,7 @@ from . import config
 from . import io_utils
 from .callbacks import (LogLearningRate, LogMetrics, LogTimestamp,
                         StopAfterTimedelta)
+from .common_utils import parse_timedelta
 from .io_utils import logging
 from .dataset_providers import DatasetProvider
 from .models import ImageCaptioningModel
@@ -180,18 +181,28 @@ class Training(object):
         return os.path.join(self._result_dir, *paths)
 
 
-def main(training_label, config_file=None, **kwargs):
-    if 'conf' in kwargs:
-        raise ValueError('conf must not be passed directly! '
-                         'Use config_file instead.')
+def main(training_label, config_file=None, _unit_test=False,
+         **config_override):
+    if 'epochs' in config_override and 'time_limit' in config_override:
+        raise ValueError('epochs and time_limit cannot be both passed!')
 
-    unit_test = kwargs.pop('unit_test', False)
-
+    conf = None
     if config_file is not None:
         config_builder = config.FileConfigBuilder(config_file)
-        kwargs['conf'] = config_builder.build_config()
+        config_dict = config_builder.build_config()._asdict()
 
-    training = Training(training_label, **kwargs)
+        if config_override:
+            config_dict.update(config_override)
+            config_dict['time_limit'] = parse_timedelta(
+                                                    config_dict['time_limit'])
+            if 'epochs' in config_override:
+                config_dict['time_limit'] = None
+            elif 'time_limit' in config_override:
+                config_dict['epochs'] = None
+
+        conf = config.Config(**config_dict)
+
+    training = Training(training_label=training_label, conf=conf)
 
     def handler(signum, frame):
         logging('Stopping training..')
@@ -204,7 +215,7 @@ def main(training_label, config_file=None, **kwargs):
 
     training.run()
 
-    if unit_test:
+    if _unit_test:
         return training
 
 

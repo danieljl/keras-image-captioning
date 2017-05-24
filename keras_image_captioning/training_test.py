@@ -60,10 +60,11 @@ class TestTraining(object):
 
 @pytest.mark.usefixtures('clean_up_training_result_dir')
 def test_main(mocker):
-    with pytest.raises(ValueError):
-        training.main(training_label=TRAINING_LABEL, conf='foo')
-
     mocker.patch.object(training.Training, 'run', lambda _: None)
+
+    with pytest.raises(ValueError):
+        training.main(training_label=TRAINING_LABEL + '/norun',
+                      epochs=2, time_limit='03:00:00')
 
     yaml_path = '/tmp/keras_img_cap_conf_test_main.yaml'
     conf = config.DefaultConfigBuilder().build_config()
@@ -71,7 +72,30 @@ def test_main(mocker):
                          batch_size=2)
     config.write_to_file(conf, yaml_path)
 
-    train = training.main(training_label=TRAINING_LABEL + '/main',
+    train = training.main(training_label=TRAINING_LABEL + '/main0',
+                          _unit_test=True)
+    assert train._config == config.DefaultConfigBuilder().build_config()
+
+    train = training.main(training_label=TRAINING_LABEL + '/main1',
                           config_file=yaml_path,
-                          unit_test=True)
+                          _unit_test=True)
     assert train._config == conf
+
+    train = training.main(training_label=TRAINING_LABEL + '/main2',
+                          config_file=yaml_path,
+                          _unit_test=True,
+                          embedding_size=123)
+    assert train._config == conf._replace(embedding_size=123)
+
+    train = training.main(training_label=TRAINING_LABEL + '/main3',
+                          config_file=yaml_path,
+                          _unit_test=True,
+                          epochs=9)
+    assert train._config == conf._replace(epochs=9, time_limit=None)
+
+    train = training.main(training_label=TRAINING_LABEL + '/main4',
+                          config_file=yaml_path,
+                          _unit_test=True,
+                          time_limit='02:00:00')
+    assert train._config == conf._replace(time_limit=timedelta(hours=2),
+                                          epochs=None)
