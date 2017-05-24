@@ -5,6 +5,8 @@ from itertools import chain
 
 
 def parse_timedelta(timedelta_str):
+    if isinstance(timedelta_str, timedelta):
+        return timedelta_str
     if not timedelta_str or timedelta_str == 'null':
         return None
 
