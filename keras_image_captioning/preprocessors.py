@@ -32,7 +32,7 @@ class ImagePreprocessor(object):
 
 
 class CaptionPreprocessor(object):
-    EOS_TOKEN = 'eos'
+    EOS_TOKEN = 'zeosz'
 
     def __init__(self, rare_words_handling=None, words_min_occur=None):
         """
