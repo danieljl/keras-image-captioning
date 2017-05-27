@@ -2,6 +2,7 @@ fire
 futures
 h5py
 ipykernel
+jupyter
 keras==2.0.4
 matplotlib
 mock

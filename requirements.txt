@@ -7,39 +7,54 @@
 backports-abc==0.5        # via tornado
 backports.shutil-get-terminal-size==1.0.0  # via ipython
 backports.ssl-match-hostname==3.5.0.1  # via tornado
+bleach==2.0.0             # via nbconvert
 certifi==2017.4.17        # via tornado
 click==6.7                # via pip-tools
+configparser==3.5.0       # via entrypoints
 cycler==0.10.0            # via matplotlib
 decorator==4.0.11         # via ipython, traitlets
+entrypoints==0.2.2        # via nbconvert
 enum34==1.1.6             # via traitlets
 fire==0.1.0
 first==2.0.1              # via pip-tools
 funcsigs==1.0.2           # via mock
-functools32==3.2.3.post2  # via matplotlib
+functools32==3.2.3.post2  # via jsonschema, matplotlib
 futures==3.1.1
 h5py==2.7.0
+html5lib==0.999999999     # via bleach
 ipykernel==4.6.1
-ipython-genutils==0.2.0   # via traitlets
-ipython==5.3.0            # via fire, ipykernel
-jupyter-client==5.0.1     # via ipykernel
-jupyter-core==4.3.0       # via jupyter-client
+ipython-genutils==0.2.0   # via nbformat, notebook, qtconsole, traitlets
+ipython==5.3.0            # via fire, ipykernel, ipywidgets, jupyter-console
+ipywidgets==6.0.0         # via jupyter
+jinja2==2.9.6             # via nbconvert, notebook
+jsonschema==2.6.0         # via nbformat
+jupyter-client==5.0.1     # via ipykernel, jupyter-console, notebook, qtconsole
+jupyter-console==5.1.0    # via jupyter
+jupyter-core==4.3.0       # via jupyter-client, nbconvert, nbformat, notebook, qtconsole
+jupyter==1.0.0
 keras==2.0.4
+markupsafe==1.0           # via jinja2
 matplotlib==2.0.1
+mistune==0.7.4            # via nbconvert
 mock==2.0.0
+nbconvert==5.2.1          # via jupyter, notebook
+nbformat==4.3.0           # via ipywidgets, nbconvert, notebook
+notebook==5.0.0           # via jupyter, widgetsnbextension
 numpy==1.12.1
 olefile==0.44             # via pillow
 pandas==0.20.1
+pandocfilters==1.4.1      # via nbconvert
 pathlib2==2.2.1           # via ipython, pickleshare
 pbr==3.0.0                # via mock
 pexpect==4.2.1            # via ipython
 pickleshare==0.7.4        # via ipython
 pillow==4.1.1
 pip-tools==1.9.0
-prompt-toolkit==1.0.14    # via ipython
+prompt-toolkit==1.0.14    # via ipython, jupyter-console
 protobuf==3.3.0           # via tensorflow
-ptyprocess==0.5.1         # via pexpect
+ptyprocess==0.5.1         # via pexpect, terminado
 py==1.4.33                # via pytest
-pygments==2.2.0           # via ipython
+pygments==2.2.0           # via ipython, jupyter-console, nbconvert, qtconsole
 pyparsing==2.2.0          # via matplotlib
 pytest-mock==1.6.0
 pytest==3.0.7
@@ -47,17 +62,22 @@ python-dateutil==2.6.0    # via jupyter-client, matplotlib, pandas
 pytz==2017.2              # via matplotlib, pandas
 pyyaml==3.12
 pyzmq==16.0.2             # via jupyter-client
+qtconsole==4.3.0          # via jupyter
 scandir==1.5              # via pathlib2
 scipy==0.19.0             # via theano
 sh==1.12.13
 simplegeneric==0.8.1      # via ipython
 singledispatch==3.4.0.3   # via tornado
-six==1.10.0               # via cycler, fire, h5py, keras, matplotlib, mock, pathlib2, pip-tools, prompt-toolkit, protobuf, python-dateutil, singledispatch, tensorflow, theano, traitlets
+six==1.10.0               # via bleach, cycler, fire, h5py, html5lib, keras, matplotlib, mock, pathlib2, pip-tools, prompt-toolkit, protobuf, python-dateutil, singledispatch, tensorflow, theano, traitlets
 subprocess32==3.2.7       # via matplotlib
 tensorflow==1.1.0
+terminado==0.6            # via notebook
+testpath==0.3.1           # via nbconvert
 theano==0.9.0             # via keras
-tornado==4.5.1            # via ipykernel
-traitlets==4.3.2          # via ipykernel, ipython, jupyter-client, jupyter-core
+tornado==4.5.1            # via ipykernel, notebook, terminado
+traitlets==4.3.2          # via ipykernel, ipython, ipywidgets, jupyter-client, jupyter-core, nbconvert, nbformat, notebook, qtconsole
 wcwidth==0.1.7            # via prompt-toolkit
+webencodings==0.5.1       # via html5lib
 werkzeug==0.12.1          # via tensorflow
 wheel==0.29.0             # via tensorflow
+widgetsnbextension==2.0.0  # via ipywidgets
