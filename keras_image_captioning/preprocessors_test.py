@@ -47,6 +47,10 @@ class TestCaptionPreprocessor(object):
         caption_prep.fit_on_captions(captions)
         assert caption_prep.vocab_size == 4 + 1  # plus <eos>
 
+    def test_EOS_TOKEN_LABEL_ENCODED(self, caption_prep):
+        caption_prep.fit_on_captions(['a'])
+        assert isinstance(caption_prep.EOS_TOKEN_LABEL_ENCODED, int)
+
     def test_fit_on_captions(self, caption_prep):
         captions = ['Keras', 'TensorFlow', 'deep learning: keras']
         caption_prep.fit_on_captions(captions)

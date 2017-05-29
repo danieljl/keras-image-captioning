@@ -1,3 +1,7 @@
+import heapq
+import numpy as np
+
+from collections import namedtuple
 from keras.engine.training import GeneratorEnqueuer
 from time import sleep
 
@@ -59,10 +63,7 @@ class BasicInference(object):
                     sleep(self._WAIT_TIME)
 
             X, y, datum_batch = generator_output
-            captions_pred = self._model.predict_on_batch(X)
-            captions_pred_str = self._preprocessor.decode_captions(
-                    captions_output=captions_pred,
-                    captions_output_expected=y)
+            captions_pred_str = self._predict_batch(X, y)
             caption_results += captions_pred_str
             datum_results += datum_batch
 
@@ -72,6 +73,13 @@ class BasicInference(object):
             return zip(caption_results, datum_results)
         else:
             return caption_results
+
+    def _predict_batch(self, X, y):
+        captions_pred = self._model.predict_on_batch(X)
+        captions_pred_str = self._preprocessor.decode_captions(
+                                                captions_output=captions_pred,
+                                                captions_output_expected=y)
+        return captions_pred_str
 
     def _evaluate(self, caption_datum_pairs):
         id_to_prediction = {}
@@ -89,3 +97,68 @@ class BasicInference(object):
                                                     id_to_references)
             result.update(metric_name_to_value)
         return result
+
+
+class BeamSearchInference(BasicInference):
+    def __init__(self,
+                 keras_model,
+                 dataset_provider,
+                 beam_size=3,
+                 max_caption_length=20):
+        super(BeamSearchInference, self).__init__(keras_model,
+                                                  dataset_provider)
+        if beam_size > 1:
+            raise NotImplementedError('Beam search with beam_size > 1 is not '
+                                      'implemented yet!')
+        self._beam_size = beam_size
+        self._max_caption_length = max_caption_length
+
+    def _predict_batch(self, X, y):
+        imgs_input, _ = X
+        batch_size = imgs_input.shape[0]
+
+        captions_input = np.full((batch_size, 1),
+                                 self._preprocessor.EOS_TOKEN_LABEL_ENCODED)
+        captions_result = [None] * batch_size
+        for _ in range(self._max_caption_length):
+            captions_pred = self._model.predict_on_batch([imgs_input,
+                                                          captions_input])
+            captions_pred_str = self._preprocessor.decode_captions(
+                                                captions_output=captions_pred)
+            for i, caption in enumerate(captions_pred_str):
+                if caption.endswith(' ' + self._preprocessor.EOS_TOKEN):
+                    if captions_result[i] is None:
+                        captions_result[i] = caption
+
+            encoded = self._preprocessor.encode_captions(captions_pred_str)
+            captions_input, _ = self._preprocessor.preprocess_batch(encoded)
+
+        # For captions that don't reach <eos> until the max caption length
+        for i, caption in enumerate(captions_pred_str):
+            if captions_result[i] is None:
+                captions_result[i] = caption
+
+        return captions_result
+
+
+class NLargest(object):
+    def __init__(self, n):
+        self._n = n
+        self._heap = []
+
+    @property
+    def size(self):
+        return len(self._heap)
+
+    def add(self, item):
+        if len(self._heap) < self._n:
+            heapq.heappush(self._heap, item)
+        else:
+            heapq.heappushpop(self._heap, item)
+
+    def n_largest(self, sort=False):
+        return sorted(self._heap, reverse=True) if sort else self._heap
+
+
+# score should precede sentence so Caption is compared with score first
+Caption = namedtuple('Caption', 'score sentence')

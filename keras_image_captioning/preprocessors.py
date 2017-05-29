@@ -50,6 +50,10 @@ class CaptionPreprocessor(object):
         self._word_of = {}
 
     @property
+    def EOS_TOKEN_LABEL_ENCODED(self):
+        return self._tokenizer.word_index[self.EOS_TOKEN]
+
+    @property
     def vocab_size(self):
         return len(self._tokenizer.word_index)
 
