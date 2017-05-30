@@ -105,6 +105,31 @@ class DefaultConfigBuilder(ConfigBuilderBase):
                       initializer='glorot_uniform')
 
 
+class VinyalsConfigBuilder(ConfigBuilderBase):
+    def build_config(self):
+        return Config(dataset_name='flickr8k',
+                      epochs=None,
+                      time_limit=timedelta(hours=10),
+                      batch_size=32,
+                      reduce_lr_factor=0.2,
+                      reduce_lr_patience=10,
+                      early_stopping_patience=sys.maxsize,
+                      lemmatize_caption=True,
+                      rare_words_handling='discard',
+                      words_min_occur=5,
+                      learning_rate=0.001,
+                      vocab_size=None,
+                      embedding_size=512,
+                      rnn_output_size=512,
+                      dropout_rate=0.0,
+                      bidirectional_rnn=False,
+                      rnn_type='lstm',
+                      rnn_layers=1,
+                      l1_reg=0.0,
+                      l2_reg=0.0,
+                      initializer='glorot_uniform')
+
+
 class PredefinedConfigBuilder(ConfigBuilderBase):
     def __init__(self, predefined_configs):
         self._predefined_configs = itertools.cycle(predefined_configs)
