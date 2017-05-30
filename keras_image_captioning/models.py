@@ -5,7 +5,7 @@ from keras.layers import (Dense, Embedding, GRU, Input, LSTM, RepeatVector,
 from keras.layers.merge import Concatenate
 from keras.layers.normalization import BatchNormalization
 from keras.layers.wrappers import Bidirectional
-from keras.optimizers import Adam
+from keras.optimizers import Nadam
 from keras.regularizers import l1_l2
 
 from .config import active_config
@@ -79,7 +79,7 @@ class ImageCaptioningModel(object):
 
         model = Model(inputs=[image_input, sentence_input],
                       outputs=sequence_output)
-        model.compile(optimizer=Adam(lr=self._learning_rate, clipnorm=5.0),
+        model.compile(optimizer=Nadam(lr=self._learning_rate, clipnorm=5.0),
                       loss=categorical_crossentropy_from_logits,
                       metrics=[categorical_accuracy_with_variable_timestep])
 
