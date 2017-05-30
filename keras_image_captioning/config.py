@@ -325,7 +325,7 @@ class FileConfigBuilder(ConfigBuilderBase):
         return Config(**config_dict)
 
 
-_active_config = DefaultConfigBuilder().build_config()
+_active_config = VinyalsConfigBuilder().build_config()
 
 
 def active_config(new_active_config=None):
