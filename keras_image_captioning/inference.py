@@ -139,6 +139,10 @@ class BeamSearchInference(BasicInference):
                     if captions_result[i] is None:
                         captions_result[i] = caption
 
+            # If all reach <eos>
+            if all(x is not None for x in captions_result):
+                break
+
             encoded = self._preprocessor.encode_captions(captions_pred_str)
             captions_input, _ = self._preprocessor.preprocess_batch(encoded)
 
