@@ -76,7 +76,7 @@ class TestFileConfigBuilder(object):
 
 
 def test_active_config():
-    default_config = config.DefaultConfigBuilder().build_config()
+    default_config = config.VinyalsConfigBuilder().build_config()
     assert config.active_config() == default_config
 
     fixed_config_keys = dict(dataset_name='flickr8k',
@@ -97,20 +97,10 @@ def test_init_vocab_size(mocker):
     # It needs to be done because we play with a global var. Ugh!
     mocker.patch.object(config, '_active_config', config._active_config)
 
-    with pytest.raises(ValueError):
-        config.init_vocab_size(None)
-
     config.init_vocab_size(10)
     assert config.active_config().vocab_size == 10
-
-    with pytest.raises(RuntimeError):
-        config.init_vocab_size(99)
 
 
 def test_write_to_file():
     yaml_path = '/tmp/keras_img_cap_conf_2.yaml'
     config.write_to_file(config.active_config(), yaml_path)
-
-
-def test_foo():
-    assert config.active_config() == config.DefaultConfigBuilder().build_config()
