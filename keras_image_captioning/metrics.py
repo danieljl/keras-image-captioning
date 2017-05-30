@@ -16,6 +16,10 @@ class Score(object):
             id_to_preds[id_] = [pred]
         avg_score, scores = self._implementation.compute_score(
                                                 id_to_references, id_to_preds)
+        if isinstance(avg_score, (list, tuple)):
+            avg_score = map(float, avg_score)
+        else:
+            avg_score = float(avg_score)
         return {self._score_name: avg_score}
 
 

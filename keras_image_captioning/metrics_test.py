@@ -27,7 +27,7 @@ class TestBLEU(object):
         bleu = BLEU(n=4)
         name_to_score = bleu.calculate(id_to_prediction, id_to_references)
         assert len(name_to_score) == 4
-        assert all(isinstance(score, float)
+        assert all(type(score) == float
                    for score in name_to_score.values())
 
 
@@ -35,7 +35,7 @@ class TestCIDEr(object):
     def test_calculate(self, id_to_prediction, id_to_references):
         cider = CIDEr()
         name_to_score = cider.calculate(id_to_prediction, id_to_references)
-        assert all(isinstance(score, float)
+        assert all(type(score) == float
                    for score in name_to_score.values())
 
 
@@ -43,7 +43,7 @@ class TestROUGE(object):
     def test_calculate(self, id_to_prediction, id_to_references):
         rouge = ROUGE()
         name_to_score = rouge.calculate(id_to_prediction, id_to_references)
-        assert all(isinstance(score, float)
+        assert all(type(score) == float
                    for score in name_to_score.values())
 
 
