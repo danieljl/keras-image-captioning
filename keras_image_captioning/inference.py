@@ -42,15 +42,15 @@ class BasicInference(object):
 
     def evaluate_training_set(self, include_prediction=False):
         return self._evaluate(self.predict_training_set(include_datum=True),
-                              include_prediction=False)
+                              include_prediction=include_prediction)
 
     def evaluate_validation_set(self, include_prediction=False):
         return self._evaluate(self.predict_validation_set(include_datum=True),
-                              include_prediction=False)
+                              include_prediction=include_prediction)
 
     def evaluate_testing_set(self, include_prediction=False):
         return self._evaluate(self.predict_testing_set(include_datum=True),
-                              include_prediction=False)
+                              include_prediction=include_prediction)
 
     def _predict(self,
                  data_generator_function,
