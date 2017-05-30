@@ -35,7 +35,7 @@ class Training(object):
             early_stopping_patience
         """
         self._training_label = training_label
-        self._config = conf or config.DefaultConfigBuilder().build_config()
+        self._config = conf or config.active_config()
         self._epochs = self._config.epochs
         self._time_limit = self._config.time_limit
         self._reduce_lr_factor = self._config.reduce_lr_factor
