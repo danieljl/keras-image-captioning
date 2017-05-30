@@ -105,7 +105,7 @@ class BasicInference(object):
             metric_name_to_value = metric.calculate(id_to_prediction,
                                                     id_to_references)
             metrics.update(metric_name_to_value)
-        return metrics, id_to_prediction if include_prediction else metrics
+        return (metrics, id_to_prediction) if include_prediction else metrics
 
 
 class BeamSearchInference(BasicInference):
