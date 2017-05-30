@@ -17,6 +17,12 @@ def test_read_text_file():
     assert len(lines) > 0
 
 
+def test_write_yaml_file():
+    obj = dict(a=1, b='c')
+    path = '/tmp/keras_img_cap_some.yaml'
+    io_utils.write_yaml_file(obj, path)
+
+
 def test_print_flush():
     io_utils.print_flush('foo bar')
 

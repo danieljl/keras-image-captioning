@@ -3,6 +3,7 @@ from __future__ import print_function
 import errno
 import os
 import sys
+import yaml
 
 from datetime import datetime
 
@@ -33,6 +34,11 @@ def read_text_file(path):
     with open(path) as f:
         for line in f:
             yield line.strip()
+
+
+def write_yaml_file(obj, path):
+    with open(path, 'w') as f:
+        yaml.dump(obj, f, default_flow_style=False)
 
 
 def print_flush(*args, **kwargs):

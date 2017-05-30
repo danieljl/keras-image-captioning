@@ -7,6 +7,7 @@ from datetime import timedelta
 from random import choice, randint, uniform
 
 from .common_utils import parse_timedelta
+from .io_utils import write_yaml_file
 
 
 Config = namedtuple('Config', '''
@@ -315,9 +316,8 @@ def init_vocab_size(vocab_size):
 
 
 def write_to_file(config, yaml_path):
-    with open(yaml_path, 'w') as f:
-        config_dict = dict(config._asdict())
-        time_limit = config_dict['time_limit']
-        if time_limit:
-            config_dict['time_limit'] = str(time_limit)
-        yaml.dump(config_dict, f, default_flow_style=False)
+    config_dict = dict(config._asdict())
+    time_limit = config_dict['time_limit']
+    if time_limit:
+        config_dict['time_limit'] = str(time_limit)
+    write_yaml_file(config_dict, yaml_path)
