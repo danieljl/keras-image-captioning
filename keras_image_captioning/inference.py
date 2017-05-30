@@ -1,11 +1,17 @@
+import fire
 import heapq
 import numpy as np
+import os
 
 from collections import namedtuple
 from keras.engine.training import GeneratorEnqueuer
 from time import sleep
 
+from .config import FileConfigBuilder, active_config
+from .dataset_providers import DatasetProvider
+from .io_utils import logging, write_yaml_file
 from .metrics import BLEU, CIDEr, ROUGE
+from .models import ImageCaptioningModel
 
 
 class BasicInference(object):
@@ -34,14 +40,17 @@ class BasicInference(object):
                              self._dataset_provider.testing_steps,
                              include_datum)
 
-    def evaluate_training_set(self):
-        return self._evaluate(self.predict_training_set(include_datum=True))
+    def evaluate_training_set(self, include_prediction=False):
+        return self._evaluate(self.predict_training_set(include_datum=True),
+                              include_prediction=False)
 
-    def evaluate_validation_set(self):
-        return self._evaluate(self.predict_validation_set(include_datum=True))
+    def evaluate_validation_set(self, include_prediction=False):
+        return self._evaluate(self.predict_validation_set(include_datum=True),
+                              include_prediction=False)
 
-    def evaluate_testing_set(self):
-        return self._evaluate(self.predict_testing_set(include_datum=True))
+    def evaluate_testing_set(self, include_prediction=False):
+        return self._evaluate(self.predict_testing_set(include_datum=True),
+                              include_prediction=False)
 
     def _predict(self,
                  data_generator_function,
@@ -81,7 +90,7 @@ class BasicInference(object):
                                                 captions_output_expected=y)
         return captions_pred_str
 
-    def _evaluate(self, caption_datum_pairs):
+    def _evaluate(self, caption_datum_pairs, include_prediction=False):
         id_to_prediction = {}
         id_to_references = {}
         for caption_pred, datum in caption_datum_pairs:
@@ -91,12 +100,12 @@ class BasicInference(object):
             id_to_prediction[img_id] = caption_pred
             id_to_references[img_id] = caption_expected
 
-        result = {}
+        metrics = {}
         for metric in self._metrics:
             metric_name_to_value = metric.calculate(id_to_prediction,
                                                     id_to_references)
-            result.update(metric_name_to_value)
-        return result
+            metrics.update(metric_name_to_value)
+        return metrics, id_to_prediction if include_prediction else metrics
 
 
 class BeamSearchInference(BasicInference):
@@ -162,3 +171,41 @@ class NLargest(object):
 
 # score should precede sentence so Caption is compared with score first
 Caption = namedtuple('Caption', 'score sentence')
+
+
+def main(training_dir, method='beam_search', beam_size=3):
+    if method != 'beam_search':
+        raise NotImplementedError('inference method = {} is not implemented '
+                                  'yet!'.format(method))
+
+    hyperparam_path = os.path.join(training_dir, 'hyperparams-config.yaml')
+    model_weights_path = os.path.join(training_dir, 'model-weights.hdf5')
+
+    logging('Loading hyperparams config..')
+    config = FileConfigBuilder(hyperparam_path).build_config()
+    active_config(config)
+    model = ImageCaptioningModel()
+    logging('Building model..')
+    model.build()
+    keras_model = model.keras_model
+    logging('Loading model weights..')
+    keras_model.load_weights(model_weights_path)
+    dataset_provider = DatasetProvider()
+
+    inference = BeamSearchInference(keras_model, dataset_provider,
+                                    beam_size=beam_size)
+    logging('Evaluating validation set..')
+    metrics, predictions = inference.evaluate_validation_set(
+                                                    include_prediction=True)
+
+    logging('Writting result to files..')
+    metrics_path = os.path.join(training_dir, 'validation-metrics.yaml')
+    predictions_path = os.path.join(training_dir, 'validation-predictions.yaml')
+    write_yaml_file(metrics, metrics_path)
+    write_yaml_file(predictions, predictions_path)
+
+    logging('Done!')
+
+
+if __name__ == '__main__':
+    fire.Fire(main)

@@ -10,4 +10,6 @@ var
                 metrics-log.csv
                 model-weights.hdf5
                 training-log.txt
+                validation-metrics.yaml
+                validation-predictions.yaml
             ...
