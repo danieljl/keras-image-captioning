@@ -10,8 +10,6 @@ from .preprocessors import CaptionPreprocessor, ImagePreprocessor
 
 
 class DatasetProvider(object):
-    _NUM_SAMPLES = 60  # Samples to overfit
-
     def __init__(self,
                  batch_size=None,
                  dataset=None,
@@ -33,17 +31,17 @@ class DatasetProvider(object):
 
     @property
     def training_steps(self):
-        return int(ceil(1. * self._NUM_SAMPLES /
+        return int(ceil(1. * self._dataset.training_set_size /
                         self._batch_size))
 
     @property
     def validation_steps(self):
-        return int(ceil(1. * self._NUM_SAMPLES /
+        return int(ceil(1. * self._dataset.validation_set_size /
                         self._batch_size))
 
     @property
     def testing_steps(self):
-        return int(ceil(1. * self._NUM_SAMPLES /
+        return int(ceil(1. * self._dataset.testing_set_size /
                         self._batch_size))
 
     @property
@@ -78,8 +76,6 @@ class DatasetProvider(object):
         # TODO Make it thread-safe. Currently only suitable for workers=1 in
         # fit_generator.
         datum_list = copy(datum_list)
-        np.random.shuffle(datum_list)
-        datum_list = datum_list[:self._NUM_SAMPLES]
         while True:
             np.random.shuffle(datum_list)
             datum_batch = []

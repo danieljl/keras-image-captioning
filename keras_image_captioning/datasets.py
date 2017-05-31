@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import re
 
@@ -58,6 +59,8 @@ class Dataset(object):
 
 
 class Flickr8kDataset(Dataset):
+    _NUM_SAMPLES = 60  # Number of samples to overfit
+
     DATASET_NAME = 'flickr8k'
 
     _TEXT_DIRNAME = 'Flickr8k_text'
@@ -79,6 +82,14 @@ class Flickr8kDataset(Dataset):
         self._training_set = self._build_set(self._IMG_TRAINING_FILENAME)
         self._validation_set = self._build_set(self._IMG_VALIDATION_FILENAME)
         self._testing_set = self._build_set(self._IMG_TESTING_FILENAME)
+
+        np.random.shuffle(self._training_set)
+        np.random.shuffle(self._validation_set)
+        np.random.shuffle(self._testing_set)
+
+        self._training_set = self._training_set[:self._NUM_SAMPLES]
+        self._validation_set = self._validation_set[:self._NUM_SAMPLES]
+        self._testing_set = self._testing_set[:self._NUM_SAMPLES]
 
     def _build_captions(self):
         if self._lemmatize_caption:
