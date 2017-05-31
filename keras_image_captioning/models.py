@@ -1,4 +1,5 @@
 from keras.applications.inception_v3 import InceptionV3
+from keras.initializers import RandomUniform
 from keras.models import Model
 from keras.layers import (Dense, Embedding, GRU, Input, LSTM, RepeatVector,
                           TimeDistributed)
@@ -37,7 +38,10 @@ class ImageCaptioningModel(object):
         self._dropout_rate = dropout_rate or active_config().dropout_rate
         self._rnn_type = rnn_type or active_config().rnn_type
         self._rnn_layers = rnn_layers or active_config().rnn_layers
+
         self._initializer = initializer or active_config().initializer
+        if self._initializer == 'vinyals_uniform':
+            self._initializer = RandomUniform(-0.08, 0.08)
 
         if bidirectional_rnn is None:
             self._bidirectional_rnn = active_config().bidirectional_rnn
