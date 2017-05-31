@@ -148,6 +148,7 @@ class Training(object):
                                       epsilon=self._min_loss_delta,
                                       factor=self._reduce_lr_factor,
                                       patience=self._reduce_lr_patience,
+                                      min_lr=1e-5,
                                       verbose=self._verbose)
 
         earling_stopping = EarlyStopping(monitor='val_loss',
