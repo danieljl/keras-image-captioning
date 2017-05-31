@@ -128,7 +128,7 @@ class VinyalsConfigBuilder(ConfigBuilderBase):
                       rnn_layers=1,
                       l1_reg=0.0,
                       l2_reg=0.0,
-                      initializer='glorot_uniform')
+                      initializer='vinyals_uniform')
 
 
 class PredefinedConfigBuilder(ConfigBuilderBase):
