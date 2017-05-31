@@ -125,7 +125,7 @@ class VinyalsConfigBuilder(ConfigBuilderBase):
                       dropout_rate=0.0,
                       bidirectional_rnn=False,
                       rnn_type='lstm',
-                      rnn_layers=1,
+                      rnn_layers=2,
                       l1_reg=0.0,
                       l2_reg=0.0,
                       initializer='vinyals_uniform')
