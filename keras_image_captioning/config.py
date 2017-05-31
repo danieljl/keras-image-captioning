@@ -111,8 +111,9 @@ class VinyalsConfigBuilder(ConfigBuilderBase):
                       epochs=None,
                       time_limit=timedelta(hours=10),
                       batch_size=32,
-                      reduce_lr_factor=0.2,
-                      reduce_lr_patience=10,
+                      # As nearest as possible to 1.0, but must not be >= 1.0
+                      reduce_lr_factor=1.0 - 1e-6,
+                      reduce_lr_patience=sys.maxsize,
                       early_stopping_patience=sys.maxsize,
                       lemmatize_caption=True,
                       rare_words_handling='nothing',
