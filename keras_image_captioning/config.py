@@ -115,7 +115,7 @@ class VinyalsConfigBuilder(ConfigBuilderBase):
                       reduce_lr_factor=1.0 - 1e-6,
                       reduce_lr_patience=sys.maxsize,
                       early_stopping_patience=sys.maxsize,
-                      lemmatize_caption=True,
+                      lemmatize_caption=False,
                       rare_words_handling='nothing',
                       words_min_occur=1,
                       learning_rate=0.001,
