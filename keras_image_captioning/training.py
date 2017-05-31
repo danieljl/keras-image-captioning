@@ -164,7 +164,6 @@ class Training(object):
         self._callbacks = [log_lr,  # Must be before tensorboard
                            log_metrics,  # Must be before model_checkpoint and
                                          # tensorboard
-                           model_checkpoint,
                            tensorboard,  # Must be before log_ts
                            log_ts,  # Must be before csv_logger
                            csv_logger,
