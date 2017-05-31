@@ -118,7 +118,7 @@ class VinyalsConfigBuilder(ConfigBuilderBase):
                       lemmatize_caption=True,
                       rare_words_handling='nothing',
                       words_min_occur=1,
-                      learning_rate=0.001,
+                      learning_rate=0.0001,
                       vocab_size=None,
                       embedding_size=512,
                       rnn_output_size=512,
