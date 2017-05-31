@@ -51,8 +51,8 @@ class LogMetrics(Callback):
             return
 
         new_logs = {}
-        # new_logs.update({k: np.float32(v) for k, v
-        #                  in self._inference.evaluate_training_set().items()})
+        new_logs.update({k: np.float32(v) for k, v
+                         in self._inference.evaluate_training_set().items()})
         new_logs.update({'val_' + k: np.float32(v) for k, v
                          in self._inference.evaluate_validation_set().items()})
         logs.update(new_logs)
