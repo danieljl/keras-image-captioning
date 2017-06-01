@@ -80,3 +80,42 @@ class StopAfterTimedelta(Callback):
         if self._stopped_epoch is not None and self._verbose > 0:
             logging('Epoch {}: stop after {}'.format(self._stopped_epoch,
                                                      self._timedelta))
+
+
+class StopWhenValLossExploding(Callback):
+    def __init__(self, ratio, verbose=0):
+        super(StopWhenValLossExploding, self).__init__()
+        self._ratio = ratio
+        self._verbose = verbose
+
+    def on_train_begin(self, logs):
+        self._first_loss = None
+        self._best_loss = None
+        self._stopped_epoch = None
+
+    def on_epoch_end(self, epoch, logs):
+        loss = logs['val_loss']
+
+        if self._first_loss is None:
+            self._first_loss = loss
+
+        elif self._best_loss is None:
+            if loss > self._first_loss:
+                self.model.stop_training = True
+                self._stopped_epoch = epoch
+            else:
+                self._best_loss = loss
+
+        else:
+            limit = (self._best_loss +
+                     self._ratio * (self._first_loss - self._best_loss))
+            if loss > limit:
+                self.model.stop_training = True
+                self._stopped_epoch = epoch
+            if loss < self._best_loss:
+                self._best_loss = loss
+
+    def on_train_end(self, logs):
+        if self._stopped_epoch is not None and self._verbose > 0:
+            logging('Stop because val loss explodes at epoch {}'.format(
+                                                        self._stopped_epoch))
