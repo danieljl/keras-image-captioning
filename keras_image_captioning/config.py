@@ -313,6 +313,32 @@ class FinerRandomConfigBuilder(FineRandomConfigBuilder):
         self._rnn_layers = lambda: randint(2, 3)
 
 
+class VinyalsRandomConfigBuilder(RandomConfigBuilder):
+    def __init__(self, fixed_config_keys):
+        super(VinyalsRandomConfigBuilder, self).__init__(fixed_config_keys)
+
+        self._batch_size = lambda: 32
+        self._reduce_lr_factor = lambda: 1.0 - 1e-6
+        self._reduce_lr_patience = lambda: sys.maxsize
+        self._early_stopping_patience = lambda: 8
+        self._lemmatize_caption = lambda: True
+        self._rare_words_handling = lambda: 'discard'
+        self._words_min_occur = lambda: 5
+        self._bidirectional_rnn = lambda: False
+        self._initializer = lambda: 'vinyals_uniform'
+
+        self._l1_reg = lambda: 0.0
+        self._l2_reg = lambda: 0.0
+
+        self._embedding_size = lambda: 512
+        self._rnn_output_size = lambda: 512
+        self._rnn_type = lambda: 'lstm'
+        self._rnn_layers = lambda: 1
+
+        self._learning_rate = lambda: 10 ** uniform(-4, -2)
+        self._dropout_rate = lambda: uniform(0.1, 0.6)
+
+
 class FileConfigBuilder(ConfigBuilderBase):
     def __init__(self, yaml_path):
         self._yaml_path = yaml_path

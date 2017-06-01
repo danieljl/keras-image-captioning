@@ -12,7 +12,7 @@ from threading import Lock, Semaphore
 from time import sleep
 from tempfile import gettempdir, NamedTemporaryFile
 
-from .config import active_config, write_to_file, Predefined2ConfigBuilder
+from .config import active_config, write_to_file, VinyalsRandomConfigBuilder
 from .common_utils import parse_timedelta
 from .datasets import get_dataset_instance
 from .io_utils import mkdir_p, logging
@@ -38,7 +38,7 @@ class HyperparamSearch(object):
         fixed_config_keys = dict(dataset_name=self._dataset_name,
                                  epochs=self._epochs,
                                  time_limit=self._time_limit)
-        self._config_builder = Predefined2ConfigBuilder()
+        self._config_builder = VinyalsRandomConfigBuilder(fixed_config_keys)
 
         try:
             self._num_gpus = len(sh.nvidia_smi('-L').split('\n')) - 1
