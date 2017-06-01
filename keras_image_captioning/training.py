@@ -10,7 +10,7 @@ from keras.callbacks import (CSVLogger, EarlyStopping, ModelCheckpoint,
 from . import config
 from . import io_utils
 from .callbacks import (LogLearningRate, LogMetrics, LogTimestamp,
-                        StopAfterTimedelta)
+                        StopAfterTimedelta, StopWhenValLossExploding)
 from .common_utils import parse_timedelta
 from .io_utils import logging
 from .dataset_providers import DatasetProvider
@@ -160,6 +160,8 @@ class Training(object):
         stop_after = StopAfterTimedelta(timedelta=self._time_limit,
                                         verbose=self._verbose)
 
+        stop_when = StopWhenValLossExploding(ratio=0.25, verbose=self._verbose)
+
         # TODO Add LearningRateScheduler. Is it still needed?
 
         self._callbacks = [log_lr,  # Must be before tensorboard
@@ -170,6 +172,7 @@ class Training(object):
                            log_ts,  # Must be before csv_logger
                            csv_logger,
                            reduce_lr,  # Must be after csv_logger
+                           stop_when,  # Must be the third last
                            earling_stopping,  # Must be the second last
                            stop_after]  # Must be the last
 
