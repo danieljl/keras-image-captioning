@@ -72,5 +72,14 @@ class Fasttext(WordVector):
             super(Fasttext, self)._load_pretrained_vectors(f)
 
 
+def get_word_vector_class(name):
+    if name == 'glove':
+        return Glove
+    elif name == 'fasttext':
+        return Fasttext
+    else:
+        raise ValueError('Word vector = {} is not found!'.format(name))
+
+
 def _word_vectors_path(*paths):
     return path_from_var_dir('pretrained-word-vectors', *paths)

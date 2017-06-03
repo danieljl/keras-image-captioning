@@ -38,6 +38,7 @@ Config = namedtuple('Config', '''
     l2_reg
 
     initializer
+    word_vector_init
 ''')
 
 BEST_CONFIGS = OrderedDict([
@@ -54,6 +55,7 @@ BEST_CONFIGS = OrderedDict([
             l2_reg=1.3722161194141783e-07,
             learning_rate=0.0007725907034140148,
             lemmatize_caption=True,
+            word_vector_init=None,
             rare_words_handling='nothing',
             reduce_lr_factor=0.999999,
             reduce_lr_patience=9223372036854775807,
@@ -102,7 +104,8 @@ class DefaultConfigBuilder(ConfigBuilderBase):
                       rnn_layers=1,
                       l1_reg=0.0,
                       l2_reg=0.0,
-                      initializer='glorot_uniform')
+                      initializer='glorot_uniform',
+                      word_vector_init=None)
 
 
 class VinyalsConfigBuilder(ConfigBuilderBase):
@@ -127,7 +130,8 @@ class VinyalsConfigBuilder(ConfigBuilderBase):
                       rnn_layers=1,
                       l1_reg=0.0,
                       l2_reg=0.0,
-                      initializer='vinyals_uniform')
+                      initializer='vinyals_uniform',
+                      word_vector_init=None)
 
 
 class PredefinedConfigBuilder(ConfigBuilderBase):
@@ -209,7 +213,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
             rnn_layers=self._rnn_layers(),
             l1_reg=self._l1_reg(),
             l2_reg=self._l2_reg(),
-            initializer=self._initializer())
+            initializer=self._initializer(),
+            word_vector_init=self._word_vector_init())
 
         config_dict.update(self._fixed_config_keys)
 
@@ -229,6 +234,7 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._words_min_occur = lambda: 1
         self._bidirectional_rnn = lambda: False
         self._initializer = lambda: 'he_normal'
+        self._word_vector_init = lambda: None
 
         self._learning_rate = lambda: 10 ** uniform(-6, -2)
         self._dropout_rate = lambda: uniform(0, 1)
@@ -326,6 +332,7 @@ class VinyalsRandomConfigBuilder(RandomConfigBuilder):
         self._words_min_occur = lambda: 5
         self._bidirectional_rnn = lambda: False
         self._initializer = lambda: 'vinyals_uniform'
+        self._word_vector_init = lambda: None
 
         self._l1_reg = lambda: 0.0
         self._l2_reg = lambda: 0.0
@@ -352,6 +359,7 @@ class Embed300RandomConfigBuilder(RandomConfigBuilder):
         self._words_min_occur = lambda: 5
         self._bidirectional_rnn = lambda: False
         self._initializer = lambda: 'glorot_uniform'
+        self._word_vector_init = lambda: choice([None, 'glove', 'fasttext'])
 
         self._l1_reg = lambda: 0.0
         self._l2_reg = lambda: 0.0

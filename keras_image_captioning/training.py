@@ -70,7 +70,7 @@ class Training(object):
         return self._result_dir
 
     def run(self):
-        self._model.build()
+        self._model.build(self._dataset_provider.vocabs)
 
         # self._model.build() is expensive so it increases the chance of a race
         # condition. Checking self._stop_training will minimize it (but it is

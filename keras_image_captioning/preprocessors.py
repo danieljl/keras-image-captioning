@@ -54,6 +54,11 @@ class CaptionPreprocessor(object):
         return self._tokenizer.word_index[self.EOS_TOKEN]
 
     @property
+    def vocabs(self):
+        word_index = self._tokenizer.word_index
+        return sorted(word_index, key=word_index.get)  # Sort by word's index
+
+    @property
     def vocab_size(self):
         return len(self._tokenizer.word_index)
 

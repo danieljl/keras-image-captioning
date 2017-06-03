@@ -39,6 +39,12 @@ class TestCaptionPreprocessor(object):
         return CaptionPreprocessor(rare_words_handling='nothing',
                                    words_min_occur=1)
 
+    def test_vocabs(self, caption_prep):
+        captions = ['b', 'b a', 'b b a c']
+        caption_prep.fit_on_captions(captions)
+        EOS = CaptionPreprocessor.EOS_TOKEN
+        assert caption_prep.vocabs == ['b', EOS, 'a', 'c']
+
     def test_vocab_size(self, caption_prep):
         with pytest.raises(AttributeError):
             caption_prep.vocab_size

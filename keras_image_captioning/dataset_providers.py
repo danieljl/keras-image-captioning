@@ -26,6 +26,10 @@ class DatasetProvider(object):
         self._build()
 
     @property
+    def vocabs(self):
+        return self._caption_preprocessor.vocabs
+
+    @property
     def vocab_size(self):
         return self._caption_preprocessor.vocab_size
 

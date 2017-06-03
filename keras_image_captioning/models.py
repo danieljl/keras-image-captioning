@@ -12,6 +12,7 @@ from keras.regularizers import l1_l2
 from .config import active_config
 from .losses import categorical_crossentropy_from_logits
 from .metrics import categorical_accuracy_with_variable_timestep
+from .word_vectors import get_word_vector_class
 
 
 class ImageCaptioningModel(object):
@@ -26,7 +27,8 @@ class ImageCaptioningModel(object):
                  rnn_layers=None,
                  l1_reg=None,
                  l2_reg=None,
-                 initializer=None):
+                 initializer=None,
+                 word_vector_init=None):
         """
         If an arg is None, it will get its value from config.active_config.
         """
@@ -38,6 +40,8 @@ class ImageCaptioningModel(object):
         self._dropout_rate = dropout_rate or active_config().dropout_rate
         self._rnn_type = rnn_type or active_config().rnn_type
         self._rnn_layers = rnn_layers or active_config().rnn_layers
+        self._word_vector_init = (word_vector_init or
+                                  active_config().word_vector_init)
 
         self._initializer = initializer or active_config().initializer
         if self._initializer == 'vinyals_uniform':
@@ -65,6 +69,10 @@ class ImageCaptioningModel(object):
         if self._rnn_layers < 1:
             raise ValueError('rnn_layers must be >= 1!')
 
+        if self._word_vector_init is not None and self._embedding_size != 300:
+            raise ValueError('If word_vector_init is not None, embedding_size '
+                             'must be 300')
+
     @property
     def keras_model(self):
         if self._keras_model is None:
@@ -72,12 +80,15 @@ class ImageCaptioningModel(object):
                                  'keras_model!')
         return self._keras_model
 
-    def build(self):
+    def build(self, vocabs=None):
         if self._keras_model:
             return
+        if vocabs is None and self._word_vector_init is not None:
+            raise ValueError('Ff word_vector_init is not None, build method '
+                             'must be called with vocabs that are not None!')
 
         image_input, image_embedding = self._build_image_embedding()
-        sentence_input, word_embedding = self._build_word_embedding()
+        sentence_input, word_embedding = self._build_word_embedding(vocabs)
         sequence_input = Concatenate(axis=1)([image_embedding, word_embedding])
         sequence_output = self._build_sequence_model(sequence_input)
 
@@ -106,13 +117,24 @@ class ImageCaptioningModel(object):
         image_input = image_model.input
         return image_input, image_embedding
 
-    def _build_word_embedding(self):
+    def _build_word_embedding(self, vocabs):
         sentence_input = Input(shape=[None])
-        word_embedding = Embedding(
-                            input_dim=self._vocab_size,
-                            output_dim=self._embedding_size,
-                            embeddings_regularizer=self._regularizer
-                         )(sentence_input)
+        if self._word_vector_init is None:
+            word_embedding = Embedding(
+                                    input_dim=self._vocab_size,
+                                    output_dim=self._embedding_size,
+                                    embeddings_regularizer=self._regularizer
+                             )(sentence_input)
+        else:
+            WordVector = get_word_vector_class(self._word_vector_init)
+            word_vector = WordVector(vocabs, self._initializer)
+            embedding_weights = word_vector.vectorize_words(vocabs)
+            word_embedding = Embedding(
+                                    input_dim=self._vocab_size,
+                                    output_dim=self._embedding_size,
+                                    embeddings_regularizer=self._regularizer,
+                                    weights=[embedding_weights]
+                             )(sentence_input)
         return sentence_input, word_embedding
 
     def _build_sequence_model(self, sequence_input):
