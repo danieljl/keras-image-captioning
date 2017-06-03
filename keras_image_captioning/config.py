@@ -359,7 +359,7 @@ class Embed300RandomConfigBuilder(RandomConfigBuilder):
         self._words_min_occur = lambda: 5
         self._bidirectional_rnn = lambda: False
         self._initializer = lambda: 'glorot_uniform'
-        self._word_vector_init = lambda: choice([None, 'glove', 'fasttext'])
+        self._word_vector_init = lambda: choice(['glove', 'fasttext'])
 
         self._l1_reg = lambda: 0.0
         self._l2_reg = lambda: 0.0
