@@ -16,12 +16,19 @@ class WordVector(object):
         return self._embedding_size
 
     def vectorize_words(self, words):
-        sess = K.get_session()
         vectors = []
         for word in words:
-            init = self._initializer(shape=(self._embedding_size,))
-            vector = self._word_vector_of.get(word, sess.run(init))
+            vector = self._word_vector_of.get(word)
             vectors.append(vector)
+
+        num_unknowns = len(filter(lambda x: x is None, vectors))
+        inits = self._initializer(shape=(num_unknowns, self._embedding_size))
+        inits = K.get_session().run(inits)
+        inits = iter(inits)
+        for i in range(len(vectors)):
+            if vectors[i] is None:
+                vectors[i] = next(inits)
+
         return np.array(vectors)
 
     def _load_pretrained_vectors(self, file_obj):
