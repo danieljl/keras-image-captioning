@@ -373,6 +373,10 @@ class FileConfigBuilder(ConfigBuilderBase):
         with open(self._yaml_path) as yaml_file:
             config_dict = yaml.load(yaml_file)
 
+        # For backward compatibility
+        for field in Config._fields:
+            config_dict.setdefault(field, None)
+
         config_dict['time_limit'] = parse_timedelta(config_dict['time_limit'])
         return Config(**config_dict)
 
