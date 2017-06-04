@@ -133,8 +133,7 @@ class ImageCaptioningModel(object):
                                     input_dim=self._vocab_size,
                                     output_dim=self._embedding_size,
                                     embeddings_regularizer=self._regularizer,
-                                    weights=[embedding_weights],
-                                    trainable=False
+                                    weights=[embedding_weights]
                              )(sentence_input)
         return sentence_input, word_embedding
 
