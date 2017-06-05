@@ -25,6 +25,7 @@ class Training(object):
                  min_lr=1e-7,
                  log_metrics_period=4,
                  explode_ratio=0.25,
+                 explode_patience=2,
                  max_q_size=10,
                  workers=1,
                  verbose=1):
@@ -48,6 +49,7 @@ class Training(object):
         self._min_lr = min_lr
         self._log_metrics_period = log_metrics_period
         self._explode_ratio = explode_ratio
+        self._explode_patience = explode_patience
         self._max_q_size = max_q_size
         self._workers = workers
         self._verbose = verbose
@@ -168,6 +170,7 @@ class Training(object):
                                         verbose=self._verbose)
 
         stop_when = StopWhenValLossExploding(ratio=self._explode_ratio,
+                                             patience=self._explode_patience,
                                              verbose=self._verbose)
 
         # TODO Add LearningRateScheduler. Is it still needed?

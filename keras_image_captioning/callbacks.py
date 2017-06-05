@@ -83,12 +83,14 @@ class StopAfterTimedelta(Callback):
 
 
 class StopWhenValLossExploding(Callback):
-    def __init__(self, ratio, verbose=0):
+    def __init__(self, ratio, patience=0, verbose=0):
         super(StopWhenValLossExploding, self).__init__()
         self._ratio = ratio
+        self._patience = patience
         self._verbose = verbose
 
     def on_train_begin(self, logs):
+        self._wait = 0
         self._first_loss = None
         self._best_loss = None
         self._stopped_epoch = None
@@ -101,17 +103,24 @@ class StopWhenValLossExploding(Callback):
 
         elif self._best_loss is None:
             if loss > self._first_loss:
-                self.model.stop_training = True
-                self._stopped_epoch = epoch
+                if self._wait >= self._patience:
+                    self.model.stop_training = True
+                    self._stopped_epoch = epoch
+                self._wait += 1
             else:
                 self._best_loss = loss
+                self._wait = 0
 
         else:
             limit = (self._best_loss +
                      self._ratio * (self._first_loss - self._best_loss))
             if loss > limit:
-                self.model.stop_training = True
-                self._stopped_epoch = epoch
+                if self._wait >= self._patience:
+                    self.model.stop_training = True
+                    self._stopped_epoch = epoch
+                self._wait += 1
+            else:
+                self._wait = 0
             if loss < self._best_loss:
                 self._best_loss = loss
 
