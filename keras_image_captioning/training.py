@@ -21,7 +21,7 @@ class Training(object):
     def __init__(self,
                  training_label,
                  conf=None,
-                 min_loss_delta=1e-4,
+                 min_delta=1e-4,
                  min_lr=1e-7,
                  log_metrics_period=4,
                  explode_ratio=0.25,
@@ -44,7 +44,7 @@ class Training(object):
         self._reduce_lr_factor = self._config.reduce_lr_factor
         self._reduce_lr_patience = self._config.reduce_lr_patience
         self._early_stopping_patience = self._config.early_stopping_patience
-        self._min_loss_delta = min_loss_delta
+        self._min_delta = min_delta
         self._min_lr = min_lr
         self._log_metrics_period = log_metrics_period
         self._explode_ratio = explode_ratio
@@ -152,7 +152,7 @@ class Training(object):
 
         reduce_lr = ReduceLROnPlateau(monitor='val_loss',
                                       mode='min',
-                                      epsilon=self._min_loss_delta,
+                                      epsilon=self._min_delta,
                                       factor=self._reduce_lr_factor,
                                       patience=self._reduce_lr_patience,
                                       min_lr=self._min_lr,
@@ -160,7 +160,7 @@ class Training(object):
 
         earling_stopping = EarlyStopping(monitor='val_loss',
                                          mode='min',
-                                         min_delta=self._min_loss_delta,
+                                         min_delta=self._min_delta,
                                          patience=self._early_stopping_patience,
                                          verbose=self._verbose)
 
