@@ -142,8 +142,8 @@ class Training(object):
         self._checkpoint_filepath = self._path_from_result_dir(
                                                         CHECKPOINT_FILENAME)
         model_checkpoint = ModelCheckpoint(filepath=self._checkpoint_filepath,
-                                           monitor='val_loss',
-                                           mode='min',
+                                           monitor='val_cider',
+                                           mode='max',
                                            save_best_only=True,
                                            save_weights_only=True,
                                            period=1,
@@ -152,16 +152,16 @@ class Training(object):
         tensorboard = TensorBoard(log_dir=self._result_dir,
                                   write_graph=False)
 
-        reduce_lr = ReduceLROnPlateau(monitor='val_loss',
-                                      mode='min',
+        reduce_lr = ReduceLROnPlateau(monitor='val_cider',
+                                      mode='max',
                                       epsilon=self._min_delta,
                                       factor=self._reduce_lr_factor,
                                       patience=self._reduce_lr_patience,
                                       min_lr=self._min_lr,
                                       verbose=self._verbose)
 
-        earling_stopping = EarlyStopping(monitor='val_loss',
-                                         mode='min',
+        earling_stopping = EarlyStopping(monitor='val_cider',
+                                         mode='max',
                                          min_delta=self._min_delta,
                                          patience=self._early_stopping_patience,
                                          verbose=self._verbose)
