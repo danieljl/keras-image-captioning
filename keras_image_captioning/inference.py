@@ -112,9 +112,9 @@ class BasicInference(object):
 class BeamSearchInference(BasicInference):
     def __init__(self,
                  keras_model,
-                 dataset_provider,
                  beam_size=3,
                  max_caption_length=20):
+        dataset_provider = DatasetProvider(single_caption=True)
         super(BeamSearchInference, self).__init__(keras_model,
                                                   dataset_provider)
         if beam_size > 1:
@@ -195,10 +195,8 @@ def main(training_dir, method='beam_search', beam_size=3):
     keras_model = model.keras_model
     logging('Loading model weights..')
     keras_model.load_weights(model_weights_path)
-    dataset_provider = DatasetProvider()
 
-    inference = BeamSearchInference(keras_model, dataset_provider,
-                                    beam_size=beam_size)
+    inference = BeamSearchInference(keras_model, beam_size=beam_size)
     logging('Evaluating validation set..')
     metrics, predictions = inference.evaluate_validation_set(
                                                     include_prediction=True)

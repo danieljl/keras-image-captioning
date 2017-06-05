@@ -4,6 +4,7 @@ from copy import copy
 from math import ceil
 from operator import attrgetter
 
+from .common_utils import flatten_list_2d
 from .config import active_config
 from .datasets import get_dataset_instance
 from .preprocessors import CaptionPreprocessor, ImagePreprocessor
@@ -14,15 +15,18 @@ class DatasetProvider(object):
                  batch_size=None,
                  dataset=None,
                  image_preprocessor=None,
-                 caption_preprocessor=None):
+                 caption_preprocessor=None,
+                 single_caption=False):
         """
         If an arg is None, it will get its value from config.active_config.
         """
         self._batch_size = batch_size or active_config().batch_size
-        self._dataset = (dataset or get_dataset_instance())
+        self._dataset = (dataset or
+                         get_dataset_instance(single_caption=single_caption))
         self._image_preprocessor = image_preprocessor or ImagePreprocessor()
         self._caption_preprocessor = (caption_preprocessor or
                                       CaptionPreprocessor())
+        self._single_caption = single_caption
         self._build()
 
     @property
@@ -73,7 +77,12 @@ class DatasetProvider(object):
 
     def _build(self):
         training_set = self._dataset.training_set
-        training_captions = map(attrgetter('caption_txt'), training_set)
+        if self._single_caption:
+            training_captions = map(attrgetter('all_captions_txt'),
+                                    training_set)
+            training_captions = flatten_list_2d(training_captions)
+        else:
+            training_captions = map(attrgetter('caption_txt'), training_set)
         self._caption_preprocessor.fit_on_captions(training_captions)
 
     def _batch_generator(self, datum_list, include_datum=False):

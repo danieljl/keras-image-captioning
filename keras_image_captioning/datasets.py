@@ -15,8 +15,9 @@ class Dataset(object):
     _DATASET_DIR_NAME = 'dataset'
     _TRAINING_RESULTS_DIR_NAME = 'training-results'
 
-    def __init__(self, dataset_name, lemmatize_caption):
+    def __init__(self, dataset_name, lemmatize_caption, single_caption):
         self._lemmatize_caption = lemmatize_caption
+        self._single_caption = single_caption
         self._root_path = io_utils.path_from_var_dir(dataset_name)
         self._create_dirs()
 
@@ -69,9 +70,10 @@ class Flickr8kDataset(Dataset):
     _IMG_VALIDATION_FILENAME = 'Flickr_8k.devImages.txt'
     _IMG_TESTING_FILENAME = 'Flickr_8k.testImages.txt'
 
-    def __init__(self, lemmatize_caption):
+    def __init__(self, lemmatize_caption, single_caption=False):
         super(Flickr8kDataset, self).__init__(self.DATASET_NAME,
-                                              lemmatize_caption)
+                                              lemmatize_caption,
+                                              single_caption)
         self._build()
 
     def _build(self):
@@ -111,11 +113,14 @@ class Flickr8kDataset(Dataset):
                                      img_path=img_path,
                                      caption_txt=caption_txt,
                                      all_captions_txt=all_captions_txt))
+                if self._single_caption:
+                    break
 
         return dataset
 
 
-def get_dataset_instance(dataset_name=None, lemmatize_caption=None):
+def get_dataset_instance(dataset_name=None, lemmatize_caption=None,
+                         single_caption=False):
     """
     If an arg is None, it will get its value from config.active_config.
     """
@@ -124,6 +129,7 @@ def get_dataset_instance(dataset_name=None, lemmatize_caption=None):
 
     for dataset_class in [Flickr8kDataset]:
         if dataset_class.DATASET_NAME == dataset_name:
-            return dataset_class(lemmatize_caption)
+            return dataset_class(lemmatize_caption=lemmatize_caption,
+                                 single_caption=single_caption)
 
     raise ValueError('Cannot find {} dataset!'.format(dataset_name))
