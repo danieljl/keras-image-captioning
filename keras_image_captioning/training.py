@@ -23,7 +23,7 @@ class Training(object):
                  conf=None,
                  min_loss_delta=1e-4,
                  min_lr=1e-7,
-                 log_metrics_period=2,
+                 log_metrics_period=4,
                  explode_ratio=0.25,
                  max_q_size=10,
                  workers=1,
