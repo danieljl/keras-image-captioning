@@ -96,7 +96,7 @@ class BasicInference(object):
         for caption_pred, datum in caption_datum_pairs:
             img_id = datum.img_filename
             caption_expected = self._preprocessor.normalize_captions(
-                                                        [datum.caption_txt])
+                                                        datum.all_captions_txt)
             id_to_prediction[img_id] = caption_pred
             id_to_references[img_id] = caption_expected
 
