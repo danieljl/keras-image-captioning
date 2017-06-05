@@ -22,6 +22,9 @@ class Training(object):
                  training_label,
                  conf=None,
                  min_loss_delta=1e-4,
+                 min_lr=1e-7,
+                 log_metrics_period=2,
+                 explode_ratio=0.25,
                  max_q_size=10,
                  workers=1,
                  verbose=1):
@@ -42,6 +45,9 @@ class Training(object):
         self._reduce_lr_patience = self._config.reduce_lr_patience
         self._early_stopping_patience = self._config.early_stopping_patience
         self._min_loss_delta = min_loss_delta
+        self._min_lr = min_lr
+        self._log_metrics_period = log_metrics_period
+        self._explode_ratio = explode_ratio
         self._max_q_size = max_q_size
         self._workers = workers
         self._verbose = verbose
@@ -123,7 +129,8 @@ class Training(object):
     def _init_callbacks(self):
         log_lr = LogLearningRate()
         log_ts = LogTimestamp()
-        log_metrics = LogMetrics(self._dataset_provider, period=2)
+        log_metrics = LogMetrics(self._dataset_provider,
+                                 period=self._log_metrics_period)
 
         CSV_FILENAME = 'metrics-log.csv'
         self._csv_filepath = self._path_from_result_dir(CSV_FILENAME)
@@ -148,7 +155,7 @@ class Training(object):
                                       epsilon=self._min_loss_delta,
                                       factor=self._reduce_lr_factor,
                                       patience=self._reduce_lr_patience,
-                                      min_lr=1e-7,
+                                      min_lr=self._min_lr,
                                       verbose=self._verbose)
 
         earling_stopping = EarlyStopping(monitor='val_loss',
@@ -160,7 +167,8 @@ class Training(object):
         stop_after = StopAfterTimedelta(timedelta=self._time_limit,
                                         verbose=self._verbose)
 
-        stop_when = StopWhenValLossExploding(ratio=0.25, verbose=self._verbose)
+        stop_when = StopWhenValLossExploding(ratio=self._explode_ratio,
+                                             verbose=self._verbose)
 
         # TODO Add LearningRateScheduler. Is it still needed?
 
