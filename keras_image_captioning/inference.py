@@ -11,7 +11,7 @@ from tqdm import tqdm
 from .config import FileConfigBuilder, active_config
 from .dataset_providers import DatasetProvider
 from .io_utils import logging, write_yaml_file
-from .metrics import BLEU, CIDEr, ROUGE
+from .metrics import BLEU, CIDEr, METEOR, ROUGE
 from .models import ImageCaptioningModel
 
 
@@ -24,7 +24,7 @@ class BasicInference(object):
         self._model = keras_model
         self._dataset_provider = dataset_provider
         self._preprocessor = dataset_provider.caption_preprocessor
-        self._metrics = [BLEU(4), CIDEr(), ROUGE()]
+        self._metrics = [BLEU(4), METEOR(), CIDEr(), ROUGE()]
 
     def predict_training_set(self, include_datum=True):
         return self._predict(self._dataset_provider.training_set,

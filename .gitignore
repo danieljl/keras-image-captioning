@@ -94,3 +94,6 @@ ENV/
 /var/**
 !/var/**/
 !/var/**/.gitkeep
+
+/pycocoevalcap/meteor/data/paraphrase-en.gz
+/pycocoevalcap/meteor/meteor-1.5.jar

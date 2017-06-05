@@ -1,7 +1,9 @@
+import os
 import tensorflow as tf
 
 from pycocoevalcap.bleu import bleu
 from pycocoevalcap.cider import cider
+from pycocoevalcap.meteor import meteor
 from pycocoevalcap.rouge import rouge
 
 
@@ -44,6 +46,25 @@ class CIDEr(Score):
     def __init__(self):
         implementation = cider.Cider()
         super(CIDEr, self).__init__('cider', implementation)
+
+
+class METEOR(Score):
+    def __init__(self):
+        implementation = meteor.Meteor()
+        super(METEOR, self).__init__('meteor', implementation)
+
+    def calculate(self, id_to_prediction, id_to_references):
+        if self._data_downloaded():
+            return super(METEOR, self).calculate(id_to_prediction,
+                                                 id_to_references)
+        else:
+            return {self._score_name: 0.0}
+
+    def _data_downloaded(self):
+        meteor_dir = os.path.dirname(meteor.__file__)
+        return (os.path.isfile(os.path.join(meteor_dir, 'meteor-1.5.jar')) and
+                os.path.isfile(
+                        os.path.join(meteor_dir, 'data', 'paraphrase-en.gz')))
 
 
 class ROUGE(Score):

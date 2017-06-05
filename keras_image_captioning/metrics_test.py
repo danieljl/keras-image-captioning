@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
-from .metrics import (BLEU, CIDEr, ROUGE,
+from .metrics import (BLEU, CIDEr, METEOR, ROUGE,
                       categorical_accuracy_with_variable_timestep)
 
 
@@ -37,6 +37,13 @@ class TestCIDEr(object):
         name_to_score = cider.calculate(id_to_prediction, id_to_references)
         assert all(type(score) == float
                    for score in name_to_score.values())
+
+
+class TestMETEOR(object):
+    def test_calculate(self, id_to_prediction, id_to_references):
+        meteor = METEOR()
+        name_to_score = meteor.calculate(id_to_prediction, id_to_references)
+        assert all(type(score) == float for score in name_to_score.values())
 
 
 class TestROUGE(object):
