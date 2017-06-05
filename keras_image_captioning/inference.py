@@ -6,6 +6,7 @@ import os
 from collections import namedtuple
 from keras.engine.training import GeneratorEnqueuer
 from time import sleep
+from tqdm import tqdm
 
 from .config import FileConfigBuilder, active_config
 from .dataset_providers import DatasetProvider
@@ -62,7 +63,7 @@ class BasicInference(object):
 
         caption_results = []
         datum_results = []
-        for _ in range(steps_per_epoch):
+        for _ in tqdm(range(steps_per_epoch)):
             generator_output = None
             while enqueuer.is_running():
                 if not enqueuer.queue.empty():

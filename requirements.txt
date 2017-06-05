@@ -75,6 +75,7 @@ terminado==0.6            # via notebook
 testpath==0.3.1           # via nbconvert
 theano==0.9.0             # via keras
 tornado==4.5.1            # via ipykernel, notebook, terminado
+tqdm==4.14.0
 traitlets==4.3.2          # via ipykernel, ipython, ipywidgets, jupyter-client, jupyter-core, nbconvert, nbformat, notebook, qtconsole
 wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5.1       # via html5lib
