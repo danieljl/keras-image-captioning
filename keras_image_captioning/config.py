@@ -373,6 +373,18 @@ class Embed300RandomConfigBuilder(RandomConfigBuilder):
         self._dropout_rate = lambda: uniform(0.1, 0.6)
 
 
+class Embed300FineRandomConfigBuilder(Embed300RandomConfigBuilder):
+    def __init__(self, fixed_config_keys):
+        super(Embed300FineRandomConfigBuilder, self).__init__(
+                                                            fixed_config_keys)
+
+        # Values below are from an analysis of hpsearch/16
+        self._word_vector_init = lambda: 'glove'
+        self._rnn_layers = lambda: randint(2, 3)
+        self._learning_rate = lambda: 10 ** uniform(-4, -2.7)
+        self._dropout_rate = lambda: uniform(0.2, 0.5)
+
+
 class FileConfigBuilder(ConfigBuilderBase):
     def __init__(self, yaml_path):
         self._yaml_path = yaml_path
