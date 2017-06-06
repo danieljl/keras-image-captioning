@@ -380,6 +380,7 @@ class Embed300FineRandomConfigBuilder(Embed300RandomConfigBuilder):
 
         self._reduce_lr_factor = lambda: uniform(0.1, 0.9)
         self._reduce_lr_patience = lambda: 4
+        self._lemmatize_caption = lambda: False
 
         # Values below are from an analysis of hpsearch/16
         self._word_vector_init = lambda: 'glove'
