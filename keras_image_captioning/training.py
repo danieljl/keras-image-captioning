@@ -21,6 +21,7 @@ class Training(object):
     def __init__(self,
                  training_label,
                  conf=None,
+                 model_weights_path=None,
                  min_delta=1e-4,
                  min_lr=1e-7,
                  log_metrics_period=4,
@@ -45,6 +46,7 @@ class Training(object):
         self._reduce_lr_factor = self._config.reduce_lr_factor
         self._reduce_lr_patience = self._config.reduce_lr_patience
         self._early_stopping_patience = self._config.early_stopping_patience
+        self._model_weights_path = model_weights_path
         self._min_delta = min_delta
         self._min_lr = min_lr
         self._log_metrics_period = log_metrics_period
@@ -78,7 +80,12 @@ class Training(object):
         return self._result_dir
 
     def run(self):
+        logging('Building model..')
         self._model.build(self._dataset_provider.vocabs)
+        if self._model_weights_path:
+            logging('Loading model weights from {}..'.format(
+                                                    self._model_weights_path))
+            self.keras_model.load_weights(self._model_weights_path)
 
         # self._model.build() is expensive so it increases the chance of a race
         # condition. Checking self._stop_training will minimize it (but it is
@@ -196,28 +203,53 @@ class Training(object):
         return os.path.join(self._result_dir, *paths)
 
 
-def main(training_label, config_file=None, _unit_test=False,
-         **config_override):
-    if 'epochs' in config_override and 'time_limit' in config_override:
-        raise ValueError('epochs and time_limit cannot be both passed!')
+class Checkpoint(object):
+    def __init__(self,
+                 new_training_label,
+                 training_dir,
+                 load_model_weights,
+                 config_override):
+        if 'epochs' in config_override and 'time_limit' in config_override:
+            raise ValueError('epochs and time_limit cannot be both passed!')
+        self._new_training_label = new_training_label
+        self._training_dir = training_dir
+        self._load_model_weights = load_model_weights
+        self._config_override = config_override
 
-    conf = None
-    if config_file is not None:
-        config_builder = config.FileConfigBuilder(config_file)
+    @property
+    def training(self):
+        training_dir = self._training_dir
+        hyperparam_path = os.path.join(training_dir, 'hyperparams-config.yaml')
+        model_weights_path = os.path.join(training_dir, 'model-weights.hdf5')
+
+        config_builder = config.FileConfigBuilder(hyperparam_path)
         config_dict = config_builder.build_config()._asdict()
-
-        if config_override:
-            config_dict.update(config_override)
+        if self._config_override:
+            config_dict.update(self._config_override)
             config_dict['time_limit'] = parse_timedelta(
                                                     config_dict['time_limit'])
-            if 'epochs' in config_override:
+            if 'epochs' in self._config_override:
                 config_dict['time_limit'] = None
-            elif 'time_limit' in config_override:
+            elif 'time_limit' in self._config_override:
                 config_dict['epochs'] = None
 
         conf = config.Config(**config_dict)
+        model_weights_path = (model_weights_path if self._load_model_weights
+                              else None)
+        return Training(training_label=self._new_training_label, conf=conf,
+                        model_weights_path=model_weights_path)
 
-    training = Training(training_label=training_label, conf=conf)
+
+def main(training_label, from_training_dir=None, load_model_weights=False,
+         _unit_test=False, **config_override):
+    if from_training_dir:
+        checkpoint = Checkpoint(new_training_label=training_label,
+                                training_dir=from_training_dir,
+                                load_model_weights=load_model_weights,
+                                config_override=config_override)
+        training = checkpoint.training
+    else:
+        training = Training(training_label=training_label)
 
     def handler(signum, frame):
         logging('Stopping training..')

@@ -58,6 +58,10 @@ class TestTraining(object):
         assert logging_mock.call_count == 2
 
 
+class TestCheckpoint(object):
+    pass  # TODO
+
+
 @pytest.mark.usefixtures('clean_up_training_result_dir')
 def test_main(mocker):
     mocker.patch.object(training.Training, 'run', lambda _: None)
