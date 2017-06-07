@@ -84,7 +84,7 @@ class ImageCaptioningModel(object):
         if self._keras_model:
             return
         if vocabs is None and self._word_vector_init is not None:
-            raise ValueError('Ff word_vector_init is not None, build method '
+            raise ValueError('If word_vector_init is not None, build method '
                              'must be called with vocabs that are not None!')
 
         image_input, image_embedding = self._build_image_embedding()
