@@ -241,7 +241,8 @@ class Checkpoint(object):
         return Training(training_label=self._new_training_label,
                         conf=conf,
                         model_weights_path=model_weights_path,
-                        log_metrics_period=self._log_metrics_period)
+                        log_metrics_period=self._log_metrics_period,
+                        explode_patience=sys.maxsize)
 
 
 def main(training_label,
