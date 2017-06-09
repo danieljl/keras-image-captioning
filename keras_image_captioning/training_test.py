@@ -68,6 +68,7 @@ def test_main(mocker):
 
     with pytest.raises(ValueError):
         training.main(training_label=TRAINING_LABEL + '/norun',
+                      from_training_dir='notnone',
                       epochs=2, time_limit='03:00:00')
 
     yaml_path = '/tmp/keras_img_cap_conf_test_main.yaml'
