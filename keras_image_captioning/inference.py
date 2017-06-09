@@ -188,6 +188,7 @@ def main(training_dir, method='beam_search', beam_size=3):
 
     logging('Loading hyperparams config..')
     config = FileConfigBuilder(hyperparam_path).build_config()
+    config = config._replace(word_vector_init=None)  # As we do an inference
     active_config(config)
     model = ImageCaptioningModel()
     logging('Building model..')
