@@ -149,7 +149,7 @@ class Training(object):
         self._checkpoint_filepath = self._path_from_result_dir(
                                                         CHECKPOINT_FILENAME)
         model_checkpoint = ModelCheckpoint(filepath=self._checkpoint_filepath,
-                                           monitor='val_loss',
+                                           monitor='val_cider',
                                            mode='min',
                                            save_best_only=True,
                                            save_weights_only=True,
