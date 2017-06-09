@@ -208,12 +208,14 @@ class Checkpoint(object):
                  new_training_label,
                  training_dir,
                  load_model_weights,
+                 log_metrics_period,
                  config_override):
         if 'epochs' in config_override and 'time_limit' in config_override:
             raise ValueError('epochs and time_limit cannot be both passed!')
         self._new_training_label = new_training_label
         self._training_dir = training_dir
         self._load_model_weights = load_model_weights
+        self._log_metrics_period = log_metrics_period
         self._config_override = config_override
 
     @property
@@ -236,20 +238,28 @@ class Checkpoint(object):
         conf = config.Config(**config_dict)
         model_weights_path = (model_weights_path if self._load_model_weights
                               else None)
-        return Training(training_label=self._new_training_label, conf=conf,
-                        model_weights_path=model_weights_path)
+        return Training(training_label=self._new_training_label,
+                        conf=conf,
+                        model_weights_path=model_weights_path,
+                        log_metrics_period=self._log_metrics_period)
 
 
-def main(training_label, from_training_dir=None, load_model_weights=False,
-         _unit_test=False, **config_override):
+def main(training_label,
+         from_training_dir=None,
+         load_model_weights=False,
+         log_metrics_period=4,
+         _unit_test=False,
+         **config_override):
     if from_training_dir:
         checkpoint = Checkpoint(new_training_label=training_label,
                                 training_dir=from_training_dir,
                                 load_model_weights=load_model_weights,
+                                log_metrics_period=log_metrics_period,
                                 config_override=config_override)
         training = checkpoint.training
     else:
-        training = Training(training_label=training_label)
+        training = Training(training_label=training_label,
+                            log_metrics_period=log_metrics_period)
 
     def handler(signum, frame):
         logging('Stopping training..')
