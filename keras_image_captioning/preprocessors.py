@@ -2,7 +2,8 @@ import numpy as np
 
 from keras.applications import inception_v3
 from keras.preprocessing import sequence as keras_seq
-from keras.preprocessing.image import img_to_array, load_img
+from keras.preprocessing.image import (ImageDataGenerator, img_to_array,
+                                       load_img)
 from keras.preprocessing.text import Tokenizer, text_to_word_sequence
 
 from .config import active_config
@@ -11,9 +12,14 @@ from .config import active_config
 class ImagePreprocessor(object):
     IMAGE_SIZE = (299, 299)
 
-    def __init__(self, image_data_generator=None):
-        self._image_data_generator = image_data_generator
-        self._do_random_transform = image_data_generator is not None
+    def __init__(self):
+        self._image_data_generator = ImageDataGenerator(rotation_range=40,
+                                                        width_shift_range=0.2,
+                                                        height_shift_range=0.2,
+                                                        shear_range=0.2,
+                                                        zoom_range=0.2,
+                                                        horizontal_flip=True,
+                                                        fill_mode='nearest')
 
     def preprocess_images(self, img_paths):
         return map(self._preprocess_an_image, img_paths)
@@ -24,9 +30,9 @@ class ImagePreprocessor(object):
     def _preprocess_an_image(self, img_path):
         img = load_img(img_path, target_size=self.IMAGE_SIZE)
         img_array = img_to_array(img)
-        img_array = inception_v3.preprocess_input(img_array)
-        if self._do_random_transform:
+        if self._image_data_generator:
             img_array = self._image_data_generator.random_transform(img_array)
+        img_array = inception_v3.preprocess_input(img_array)
 
         return img_array
 
