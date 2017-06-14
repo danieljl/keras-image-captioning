@@ -35,6 +35,7 @@ class TestBasicInference(object):
         assert all(isinstance(x, float) for x in result.values())
 
 
+# TODO Test with beam_size > 1
 class TestBeamSearchInference(object):
     @pytest.fixture
     def inference(self, mocker):
@@ -60,6 +61,11 @@ class TestBeamSearchInference(object):
         assert all(len(caption.split()) == 3 for caption in result)
 
 
+class TestBatchNLargest(object):
+    pass  # TODO
+
+
+# TODO Test add_many
 class TestNLargest(object):
     def test_functionality(self):
         captions = NLargest(2)

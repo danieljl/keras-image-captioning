@@ -104,6 +104,21 @@ class CaptionPreprocessor(object):
 
         return captions_str
 
+    # TODO Test method below
+    def decode_captions_from_list2d(self, captions_encoded):
+        """
+        Args
+          captions_encoded: 1-based (Tokenizer's), NOT 0-based (model's)
+        """
+        captions_decoded = []
+        for caption_encoded in captions_encoded:
+            words_decoded = []
+            for word_encoded in caption_encoded:
+                # No need of incrementing word_encoded
+                words_decoded.append(self._word_of[word_encoded])
+            captions_decoded.append(' '.join(words_decoded))
+        return captions_decoded
+
     def normalize_captions(self, captions_txt):
         captions_txt = self._add_eos(captions_txt)
         word_sequences = map(text_to_word_sequence, captions_txt)
