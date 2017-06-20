@@ -160,10 +160,9 @@ class BeamSearchInference(BasicInference):
 
                 partial_captions_result = []
                 complete_captions_result = []
-                for batch, sentence, words, log_probs in zip(range(batch_size),
-                                                             sentences_encoded,
-                                                             top_words,
-                                                             log_probs_total):
+                for sentence, words, log_probs in zip(sentences_encoded,
+                                                      top_words,
+                                                      log_probs_total):
                     partial_captions_batch = []
                     complete_captions_batch = []
                     for word, log_prob in zip(words, log_probs):
