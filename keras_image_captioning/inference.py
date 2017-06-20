@@ -277,9 +277,9 @@ def main(training_dir, method='beam_search', beam_size=3):
 
     logging('Writting result to files..')
     metrics_path = os.path.join(training_dir,
-                                'validation-metrics-{}.yaml'.format(beam_size))
+                        'validation-metrics-debug-{}.yaml'.format(beam_size))
     predictions_path = os.path.join(training_dir,
-                            'validation-predictions-{}.yaml'.format(beam_size))
+                    'validation-predictions-debug-{}.yaml'.format(beam_size))
     write_yaml_file(metrics, metrics_path)
     write_yaml_file(predictions, predictions_path)
 
