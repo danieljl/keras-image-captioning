@@ -193,7 +193,9 @@ class BeamSearchInference(BasicInference):
                 logging('complete')
                 results.append(complete_caption.sentence_encoded)
 
-        return self._preprocessor.decode_captions_from_list2d(results)
+        retval = self._preprocessor.decode_captions_from_list2d(results)
+        logging(retval)
+        return retval
 
     def _log_softmax(self, numpy_array):
         tensor = tf.constant(numpy_array)
