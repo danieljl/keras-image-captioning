@@ -180,6 +180,7 @@ class BeamSearchInference(BasicInference):
 
                 partial_captions.add_many(partial_captions_result)
                 complete_captions.add_many(complete_captions_result)
+                logging(complete_captions.n_largest(sort=True)[0][0])
 
         top_partial_captions = partial_captions.n_largest(sort=True)[0]
         top_complete_captions = complete_captions.n_largest(sort=True)[0]
@@ -187,14 +188,14 @@ class BeamSearchInference(BasicInference):
         for complete_caption, partial_caption in zip(top_partial_captions,
                                                      top_complete_captions):
             if complete_caption is None:
-                logging('partial')
+                # logging('partial')
                 results.append(partial_caption.sentence_encoded)
             else:
-                logging('complete')
+                # logging('complete')
                 results.append(complete_caption.sentence_encoded)
 
         retval = self._preprocessor.decode_captions_from_list2d(results)
-        logging(retval)
+        # logging(retval)
         return retval
 
     def _log_softmax(self, numpy_array):
