@@ -188,8 +188,10 @@ class BeamSearchInference(BasicInference):
         for complete_caption, partial_caption in zip(top_partial_captions,
                                                      top_complete_captions):
             if complete_caption is None:
+                logging('partial')
                 results.append(partial_caption.sentence_encoded)
             else:
+                logging('complete')
                 results.append(complete_caption.sentence_encoded)
 
         return self._preprocessor.decode_captions_from_list2d(results)
