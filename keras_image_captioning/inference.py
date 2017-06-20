@@ -188,7 +188,7 @@ class BeamSearchInference(BasicInference):
         top_partial_captions = partial_captions.n_largest(sort=True)[0]
         top_complete_captions = complete_captions.n_largest(sort=True)[0]
         results = []
-        for complete_caption, partial_caption in zip(top_partial_captions,
+        for partial_caption, complete_caption in zip(top_partial_captions,
                                                      top_complete_captions):
             if complete_caption is None:
                 # logging('partial')
