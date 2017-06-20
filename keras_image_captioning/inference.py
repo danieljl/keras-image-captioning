@@ -172,8 +172,13 @@ class BeamSearchInference(BasicInference):
                         caption = Caption(sentence_encoded=sentence_encoded,
                                           log_prob=log_prob)
                         partial_captions_batch.append(caption)
-                        complete_captions_batch.append(caption
-                                            if word == EOS_ENCODED else None)
+                        if word == EOS_ENCODED:
+                            complete_caption = Caption(
+                                                    sentence_encoded=sentence,
+                                                    log_prob=log_prob)
+                            complete_captions_batch.append(complete_caption)
+                        else:
+                            complete_captions_batch.append(None)
 
                     partial_captions_result.append(partial_captions_batch)
                     complete_captions_result.append(complete_captions_batch)
