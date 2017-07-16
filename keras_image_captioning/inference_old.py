@@ -130,26 +130,21 @@ class BeamSearchInference(BasicInference):
                                  self._preprocessor.EOS_TOKEN_LABEL_ENCODED)
         captions_result = [None] * batch_size
         for _ in range(self._max_caption_length):
-            with how_long('total in one length'):
-                with how_long('predict on batch'):
-                    captions_pred = self._model.predict_on_batch(
-                        [imgs_input, captions_input])
-                with how_long('decode captions'):
-                    captions_pred_str = self._preprocessor.decode_captions(
-                        captions_output=captions_pred)
-                for i, caption in enumerate(captions_pred_str):
-                    if caption.endswith(' ' + self._preprocessor.EOS_TOKEN):
-                        if captions_result[i] is None:
-                            captions_result[i] = caption
+            captions_pred = self._model.predict_on_batch(
+                [imgs_input, captions_input])
+            captions_pred_str = self._preprocessor.decode_captions(
+                captions_output=captions_pred)
+            for i, caption in enumerate(captions_pred_str):
+                if caption.endswith(' ' + self._preprocessor.EOS_TOKEN):
+                    if captions_result[i] is None:
+                        captions_result[i] = caption
 
-                # If all reach <eos>
-                if all(x is not None for x in captions_result):
-                    break
+            # If all reach <eos>
+            if all(x is not None for x in captions_result):
+                break
 
-                with how_long('encode captions'):
-                    encoded = self._preprocessor.encode_captions(captions_pred_str)
-                with how_long('preprocess batch'):
-                    captions_input, _ = self._preprocessor.preprocess_batch(encoded)
+            encoded = self._preprocessor.encode_captions(captions_pred_str)
+            captions_input, _ = self._preprocessor.preprocess_batch(encoded)
 
         # For captions that don't reach <eos> until the max caption length
         for i, caption in enumerate(captions_pred_str):
@@ -180,16 +175,6 @@ class NLargest(object):
 
 # score should precede sentence so Caption is compared with score first
 Caption = namedtuple('Caption', 'score sentence')
-
-
-from contextlib import contextmanager
-from timeit import default_timer as timer
-@contextmanager
-def how_long(msg):
-    start = timer()
-    yield
-    end = timer()
-    print('{} = {:.2f} seconds'.format(msg, end - start))
 
 
 def main(training_dir, method='beam_search', beam_size=3):
