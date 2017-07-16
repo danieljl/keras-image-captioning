@@ -290,7 +290,7 @@ def main(training_dir, method='beam_search', beam_size=3):
     metrics, predictions = inference.evaluate_validation_set(
                                                     include_prediction=True)
 
-    logging('Writting result to files..')
+    logging('Writing result to files..')
     metrics_path = os.path.join(training_dir,
                         'validation-metrics-debug-{}.yaml'.format(beam_size))
     predictions_path = os.path.join(training_dir,
