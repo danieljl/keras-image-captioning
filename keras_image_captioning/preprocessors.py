@@ -1,5 +1,6 @@
 import numpy as np
 
+from functools import partial
 from keras.applications import inception_v3
 from keras.preprocessing import sequence as keras_seq
 from keras.preprocessing.image import (ImageDataGenerator, img_to_array,
@@ -21,16 +22,18 @@ class ImagePreprocessor(object):
                                                         horizontal_flip=True,
                                                         fill_mode='nearest')
 
-    def preprocess_images(self, img_paths):
-        return map(self._preprocess_an_image, img_paths)
+    def preprocess_images(self, img_paths, random_transform=True):
+        return map(partial(self._preprocess_an_image,
+                           random_transform=random_transform),
+                   img_paths)
 
     def preprocess_batch(self, img_list):
         return np.array(img_list)
 
-    def _preprocess_an_image(self, img_path):
+    def _preprocess_an_image(self, img_path, random_transform=True):
         img = load_img(img_path, target_size=self.IMAGE_SIZE)
         img_array = img_to_array(img)
-        if self._image_data_generator:
+        if random_transform:
             img_array = self._image_data_generator.random_transform(img_array)
         img_array = inception_v3.preprocess_input(img_array)
 
