@@ -139,56 +139,61 @@ class BeamSearchInference(BasicInference):
             partial_captions_prev = partial_captions
             partial_captions = BatchNLargest(batch_size=batch_size,
                                              n=self._beam_size)
+            with how_long('total in one length'):
+                for top_captions in partial_captions_prev.n_largest():
+                    sentences_encoded = [x.sentence_encoded for x in top_captions]
+                    with how_long('preprocess batch'):
+                        captions_input, _ = self._preprocessor.preprocess_batch(
+                                                                    sentences_encoded)
+                    with how_long('predict on batch'):
+                        preds = self._model.predict_on_batch([imgs_input,
+                                                            captions_input])
+                    with how_long('log softmax'):
+                        preds = self._log_softmax(preds)  # Convert logits to log probs
+                    preds = preds[:, :-1, :]  # Discard the last word (dummy)
+                    preds = preds[:, -1]  # We only care the last word in a caption
 
-            for top_captions in partial_captions_prev.n_largest():
-                sentences_encoded = [x.sentence_encoded for x in top_captions]
-                captions_input, _ = self._preprocessor.preprocess_batch(
-                                                            sentences_encoded)
-                preds = self._model.predict_on_batch([imgs_input,
-                                                      captions_input])
-                preds = self._log_softmax(preds)  # Convert logits to log probs
-                preds = preds[:, :-1, :]  # Discard the last word (dummy)
-                preds = preds[:, -1]  # We only care the last word in a caption
+                    with how_long('find top words'):
+                        top_words = np.argpartition(
+                                        preds, -self._beam_size)[:, -self._beam_size:]
+                        row_indexes = np.arange(batch_size)[:, np.newaxis]
+                        top_words_log_prob = preds[row_indexes, top_words]
+                        log_probs_prev = np.array([x.log_prob
+                                                for x in top_captions])[:, np.newaxis]
+                        log_probs_total = top_words_log_prob + log_probs_prev
 
-                top_words = np.argpartition(
-                                preds, -self._beam_size)[:, -self._beam_size:]
-                row_indexes = np.arange(batch_size)[:, np.newaxis]
-                top_words_log_prob = preds[row_indexes, top_words]
-                log_probs_prev = np.array([x.log_prob
-                                        for x in top_captions])[:, np.newaxis]
-                log_probs_total = top_words_log_prob + log_probs_prev
+                    with how_long('generate results'):
+                        partial_captions_result = []
+                        complete_captions_result = []
+                        for sentence, words, log_probs in zip(sentences_encoded,
+                                                            top_words,
+                                                            log_probs_total):
+                            partial_captions_batch = []
+                            complete_captions_batch = []
+                            for word, log_prob in zip(words, log_probs):
+                                word += 1  # Convert from model's to Tokenizer's
+                                # sentence[-1] is always EOS_ENCODED
+                                sentence_encoded = sentence[:-1] + [word, sentence[-1]]
+                                caption = Caption(sentence_encoded=sentence_encoded,
+                                                log_prob=log_prob)
+                                partial_captions_batch.append(caption)
+                                if word == EOS_ENCODED:
+                                    complete_caption = Caption(
+                                                            sentence_encoded=sentence,
+                                                            log_prob=log_prob)
+                                    complete_captions_batch.append(complete_caption)
+                                else:
+                                    complete_captions_batch.append(None)
 
-                partial_captions_result = []
-                complete_captions_result = []
-                for sentence, words, log_probs in zip(sentences_encoded,
-                                                      top_words,
-                                                      log_probs_total):
-                    partial_captions_batch = []
-                    complete_captions_batch = []
-                    for word, log_prob in zip(words, log_probs):
-                        word += 1  # Convert from model's to Tokenizer's
-                        # sentence[-1] is always EOS_ENCODED
-                        sentence_encoded = sentence[:-1] + [word, sentence[-1]]
-                        caption = Caption(sentence_encoded=sentence_encoded,
-                                          log_prob=log_prob)
-                        partial_captions_batch.append(caption)
-                        if word == EOS_ENCODED:
-                            complete_caption = Caption(
-                                                    sentence_encoded=sentence,
-                                                    log_prob=log_prob)
-                            complete_captions_batch.append(complete_caption)
-                        else:
-                            complete_captions_batch.append(None)
+                            partial_captions_result.append(partial_captions_batch)
+                            complete_captions_result.append(complete_captions_batch)
 
-                    partial_captions_result.append(partial_captions_batch)
-                    complete_captions_result.append(complete_captions_batch)
+                        partial_captions.add_many(partial_captions_result)
+                        complete_captions.add_many(complete_captions_result)
 
-                partial_captions.add_many(partial_captions_result)
-                complete_captions.add_many(complete_captions_result)
-
-                # to_log = complete_captions.n_largest(sort=True)
-                # if to_log:
-                #     logging(to_log[0][0])
+                    # to_log = complete_captions.n_largest(sort=True)
+                    # if to_log:
+                    #     logging(to_log[0][0])
             # Stop iteration if each has a complete caption
             n_largests = complete_captions.n_largest()
             if n_largests:
@@ -265,6 +270,16 @@ class NLargest(object):
 # log_prob first. sentence_encoded is 1-based (Tokenizer's), not 0-based
 # (model's)
 Caption = namedtuple('Caption', 'log_prob sentence_encoded')
+
+
+from contextlib import contextmanager
+from timeit import default_timer as timer
+@contextmanager
+def how_long(msg):
+    start = timer()
+    yield
+    end = timer()
+    print('{} = {:.2f} seconds'.format(msg, end - start))
 
 
 def main(training_dir, method='beam_search', beam_size=3):
