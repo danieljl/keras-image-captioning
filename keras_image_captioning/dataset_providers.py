@@ -62,17 +62,20 @@ class DatasetProvider(object):
 
     def training_set(self, include_datum=False):
         for batch in self._batch_generator(self._dataset.training_set,
-                                           include_datum):
+                                           include_datum,
+                                           random_transform=True):
             yield batch
 
     def validation_set(self, include_datum=False):
         for batch in self._batch_generator(self._dataset.validation_set,
-                                           include_datum):
+                                           include_datum,
+                                           random_transform=False):
             yield batch
 
     def testing_set(self, include_datum=False):
         for batch in self._batch_generator(self._dataset.testing_set,
-                                           include_datum):
+                                           include_datum,
+                                           random_transform=False):
             yield batch
 
     def _build(self):
@@ -85,7 +88,8 @@ class DatasetProvider(object):
             training_captions = map(attrgetter('caption_txt'), training_set)
         self._caption_preprocessor.fit_on_captions(training_captions)
 
-    def _batch_generator(self, datum_list, include_datum=False):
+    def _batch_generator(self, datum_list, include_datum=False,
+                         random_transform=True):
         # TODO Make it thread-safe. Currently only suitable for workers=1 in
         # fit_generator.
         datum_list = copy(datum_list)
@@ -95,16 +99,20 @@ class DatasetProvider(object):
             for datum in datum_list:
                 datum_batch.append(datum)
                 if len(datum_batch) >= self._batch_size:
-                    yield self._preprocess_batch(datum_batch, include_datum)
+                    yield self._preprocess_batch(datum_batch, include_datum,
+                                                 random_transform)
                     datum_batch = []
             if datum_batch:
-                yield self._preprocess_batch(datum_batch, include_datum)
+                yield self._preprocess_batch(datum_batch, include_datum,
+                                             random_transform)
 
-    def _preprocess_batch(self, datum_batch, include_datum=False):
+    def _preprocess_batch(self, datum_batch, include_datum=False,
+                          random_transform=True):
         imgs_path = map(attrgetter('img_path'), datum_batch)
         captions_txt = map(attrgetter('caption_txt'), datum_batch)
 
-        img_batch = self._image_preprocessor.preprocess_images(imgs_path)
+        img_batch = self._image_preprocessor.preprocess_images(imgs_path,
+                                                            random_transform)
         caption_batch = self._caption_preprocessor.encode_captions(captions_txt)
 
         imgs_input = self._image_preprocessor.preprocess_batch(img_batch)
