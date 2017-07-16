@@ -2,7 +2,6 @@ import fire
 import heapq
 import numpy as np
 import os
-import tensorflow as tf
 
 from collections import namedtuple
 from keras.engine.training import GeneratorEnqueuer
@@ -120,7 +119,6 @@ class BeamSearchInference(BasicInference):
                                                   dataset_provider)
         self._beam_size = beam_size
         self._max_caption_length = max_caption_length
-        self._sess = tf.Session()
 
     def _predict_batch(self, X, y):
         imgs_input, _ = X
@@ -207,10 +205,9 @@ class BeamSearchInference(BasicInference):
 
         return self._preprocessor.decode_captions_from_list2d(results)
 
-    def _log_softmax(self, numpy_array):
-        tensor = tf.constant(numpy_array)
-        log_softmax = tf.nn.log_softmax(tensor)
-        return self._sess.run(log_softmax)
+    def _log_softmax(self, x):
+        x = x - np.max(x, axis=-1, keepdims=True)  # For numerical stability
+        return x - np.log(np.sum(np.exp(x), axis=-1, keepdims=True))
 
 
 class BatchNLargest(object):
