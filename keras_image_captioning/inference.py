@@ -193,6 +193,7 @@ class BeamSearchInference(BasicInference):
             n_largests = complete_captions.n_largest()
             if n_largests:
                 if all(x is not None for x in n_largests[0]):
+                    logging('stopped early')
                     break
 
         top_partial_captions = partial_captions.n_largest(sort=True)[0]
