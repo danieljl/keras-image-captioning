@@ -184,9 +184,6 @@ class BeamSearchInference(BasicInference):
                 partial_captions.add_many(partial_captions_result)
                 complete_captions.add_many(complete_captions_result)
 
-                # to_log = complete_captions.n_largest(sort=True)
-                # if to_log:
-                #     logging(to_log[0][0])
             # Stop iteration if each has a complete caption
             n_largests = complete_captions.n_largest()
             if n_largests:
