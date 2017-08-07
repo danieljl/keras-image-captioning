@@ -33,8 +33,8 @@ class ImagePreprocessor(object):
     def _preprocess_an_image(self, img_path, random_transform=True):
         img = load_img(img_path, target_size=self.IMAGE_SIZE)
         img_array = img_to_array(img)
-        if random_transform:
-            img_array = self._image_data_generator.random_transform(img_array)
+        # if random_transform:
+        #     img_array = self._image_data_generator.random_transform(img_array)
         img_array = inception_v3.preprocess_input(img_array)
 
         return img_array
