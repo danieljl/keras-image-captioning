@@ -13,7 +13,7 @@ from .config import active_config
 class ImagePreprocessor(object):
     IMAGE_SIZE = (299, 299)
 
-    def __init__(self):
+    def __init__(self, image_augmentation=None):
         self._image_data_generator = ImageDataGenerator(rotation_range=40,
                                                         width_shift_range=0.2,
                                                         height_shift_range=0.2,
@@ -21,6 +21,10 @@ class ImagePreprocessor(object):
                                                         zoom_range=0.2,
                                                         horizontal_flip=True,
                                                         fill_mode='nearest')
+        if image_augmentation is None:
+            self._image_augmentation_switch = active_config().image_augmentation
+        else:
+            self._image_augmentation_switch = image_augmentation
 
     def preprocess_images(self, img_paths, random_transform=True):
         return map(partial(self._preprocess_an_image,
@@ -33,8 +37,8 @@ class ImagePreprocessor(object):
     def _preprocess_an_image(self, img_path, random_transform=True):
         img = load_img(img_path, target_size=self.IMAGE_SIZE)
         img_array = img_to_array(img)
-        # if random_transform:
-        #     img_array = self._image_data_generator.random_transform(img_array)
+        if self._image_augmentation_switch and random_transform:
+            img_array = self._image_data_generator.random_transform(img_array)
         img_array = inception_v3.preprocess_input(img_array)
 
         return img_array

@@ -39,6 +39,8 @@ Config = namedtuple('Config', '''
 
     initializer
     word_vector_init
+
+    image_augmentation
 ''')
 
 BEST_CONFIGS = OrderedDict([
@@ -64,7 +66,8 @@ BEST_CONFIGS = OrderedDict([
             rnn_type='lstm',
             time_limit=None,
             vocab_size=5578,
-            words_min_occur=1))
+            words_min_occur=1,
+            image_augmentation=False))
 ])
 
 
@@ -105,7 +108,8 @@ class DefaultConfigBuilder(ConfigBuilderBase):
                       l1_reg=0.0,
                       l2_reg=0.0,
                       initializer='glorot_uniform',
-                      word_vector_init=None)
+                      word_vector_init=None,
+                      image_augmentation=False)
 
 
 class VinyalsConfigBuilder(ConfigBuilderBase):
@@ -131,7 +135,8 @@ class VinyalsConfigBuilder(ConfigBuilderBase):
                       l1_reg=0.0,
                       l2_reg=0.0,
                       initializer='vinyals_uniform',
-                      word_vector_init=None)
+                      word_vector_init=None,
+                      image_augmentation=False)
 
 
 class PredefinedConfigBuilder(ConfigBuilderBase):
@@ -214,7 +219,8 @@ class RandomConfigBuilder(ConfigBuilderBase):
             l1_reg=self._l1_reg(),
             l2_reg=self._l2_reg(),
             initializer=self._initializer(),
-            word_vector_init=self._word_vector_init())
+            word_vector_init=self._word_vector_init(),
+            image_augmentation=False)  # Don't finetune
 
         config_dict.update(self._fixed_config_keys)
 
