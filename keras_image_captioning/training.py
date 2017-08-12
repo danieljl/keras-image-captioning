@@ -150,7 +150,7 @@ class Training(object):
                                                         CHECKPOINT_FILENAME)
         model_checkpoint = ModelCheckpoint(filepath=self._checkpoint_filepath,
                                            monitor='val_cider',
-                                           mode='min',
+                                           mode='max',
                                            save_best_only=True,
                                            save_weights_only=True,
                                            period=1,
