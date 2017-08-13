@@ -69,13 +69,13 @@ class DatasetProvider(object):
     def validation_set(self, include_datum=False):
         for batch in self._batch_generator(self._dataset.validation_set,
                                            include_datum,
-                                           random_transform=False):
+                                           random_transform=True):
             yield batch
 
     def test_set(self, include_datum=False):
         for batch in self._batch_generator(self._dataset.test_set,
                                            include_datum,
-                                           random_transform=False):
+                                           random_transform=True):
             yield batch
 
     def _build(self):
