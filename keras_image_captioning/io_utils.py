@@ -14,10 +14,15 @@ def _path_from_here(path):
 
 
 _VAR_ROOT_DIR = _path_from_here('../var/')
+_RESULTS_ROOT_DIR = _path_from_here('../results/')
 
 
 def path_from_var_dir(*paths):
     return os.path.join(_VAR_ROOT_DIR, *paths)
+
+
+def path_from_results_dir(*paths):
+    return os.path.join(_RESULTS_ROOT_DIR, *paths)
 
 
 def mkdir_p(path):
