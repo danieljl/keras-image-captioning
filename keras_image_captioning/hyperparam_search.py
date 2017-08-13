@@ -20,6 +20,7 @@ from .io_utils import mkdir_p, logging
 
 
 class HyperparamSearch(object):
+    """Spawns and schedules training scripts."""
     def __init__(self,
                  training_label_prefix,
                  dataset_name=None,
@@ -72,6 +73,7 @@ class HyperparamSearch(object):
         return self._lock
 
     def run(self):
+        """Start the hyperparameter search."""
         for search_index in itertools.count():
             sleep(uniform(0.1, 1))
             self._semaphore.acquire()
@@ -98,6 +100,7 @@ class HyperparamSearch(object):
         self._wait_running_commands()
 
     def stop(self):
+        """Stop the hyperparameter search."""
         self._stop_search = True
 
     def training_label(self, search_index):
@@ -143,6 +146,8 @@ class HyperparamSearch(object):
 
 
 class TrainingCommand(object):
+    """Executes and manages a training script."""
+
     COMMAND = sh.python.bake('-m', 'keras_image_captioning.training')
 
     def __init__(self,
@@ -179,6 +184,7 @@ class TrainingCommand(object):
         return self._config_filepath
 
     def execute(self):
+        """Execute the training."""
         env = os.environ.copy()
         env['CUDA_VISIBLE_DEVICES'] = str(self.gpu_index)
         return self.COMMAND(training_label=self.training_label,

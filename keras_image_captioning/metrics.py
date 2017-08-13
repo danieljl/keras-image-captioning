@@ -8,6 +8,8 @@ from pycocoevalcap.rouge import rouge
 
 
 class Score(object):
+    """A subclass of this class is an adapter of pycocoevalcap."""
+
     def __init__(self, score_name, implementation):
         self._score_name = score_name
         self._implementation = implementation

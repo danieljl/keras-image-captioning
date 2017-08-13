@@ -16,6 +16,8 @@ from .word_vectors import get_word_vector_class
 
 
 class ImageCaptioningModel(object):
+    """A very configurable model to produce captions from images."""
+
     def __init__(self,
                  learning_rate=None,
                  vocab_size=None,

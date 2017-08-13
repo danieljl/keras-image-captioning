@@ -11,6 +11,7 @@ from .preprocessors import CaptionPreprocessor, ImagePreprocessor
 
 
 class DatasetProvider(object):
+    """Acts as an adapter of `Dataset` for Keras' `fit_generator` method."""
     def __init__(self,
                  batch_size=None,
                  dataset=None,

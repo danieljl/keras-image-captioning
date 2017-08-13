@@ -18,6 +18,8 @@ from .models import ImageCaptioningModel
 
 
 class Training(object):
+    """A training instance that primarily handles training callbacks, such as
+    logging and early stopping."""
     def __init__(self,
                  training_label,
                  conf=None,

@@ -16,6 +16,9 @@ from .models import ImageCaptioningModel
 
 
 class BasicInference(object):
+    """A very basic inference without beam search. Technically, it is not an
+    inference because the actual captions are also feeded into the model."""
+
     _MAX_Q_SIZE = 10
     _WORKERS = 1
     _WAIT_TIME = 0.01
@@ -110,6 +113,7 @@ class BasicInference(object):
 
 
 class BeamSearchInference(BasicInference):
+    """An implementation of inference using beam search."""
     def __init__(self,
                  keras_model,
                  beam_size=3,
@@ -202,6 +206,8 @@ class BeamSearchInference(BasicInference):
 
 
 class BatchNLargest(object):
+    """A batch priority queue."""
+
     def __init__(self, batch_size, n):
         self._batch_size = batch_size
         self._n_largests = [NLargest(n=n) for _ in range(batch_size)]
@@ -224,6 +230,8 @@ class BatchNLargest(object):
 
 
 class NLargest(object):
+    """An implementation of priority queue with max size."""
+
     def __init__(self, n):
         self._n = n
         self._heap = []

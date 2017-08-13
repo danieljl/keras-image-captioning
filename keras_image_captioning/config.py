@@ -9,7 +9,7 @@ from random import choice, randint, uniform
 from .common_utils import parse_timedelta
 from .io_utils import write_yaml_file
 
-
+# List of all available hyperparameters
 Config = namedtuple('Config', '''
     dataset_name
     epochs

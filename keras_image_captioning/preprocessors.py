@@ -11,6 +11,8 @@ from .config import active_config
 
 
 class ImagePreprocessor(object):
+    """A Inception v3 image preprocessor. Implements an image augmentation
+    as well."""
     IMAGE_SIZE = (299, 299)
 
     def __init__(self, image_augmentation=None):
@@ -45,6 +47,8 @@ class ImagePreprocessor(object):
 
 
 class CaptionPreprocessor(object):
+    """Preprocesses captions before feeded into the network."""
+
     EOS_TOKEN = 'zeosz'
 
     def __init__(self, rare_words_handling=None, words_min_occur=None):

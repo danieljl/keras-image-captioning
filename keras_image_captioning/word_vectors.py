@@ -6,6 +6,7 @@ from .preprocessors import CaptionPreprocessor
 
 
 class WordVector(object):
+    """An initializer for Embedding layers of Keras."""
     def __init__(self, vocab_words, initializer):
         self._vocab_words = set(vocab_words)
         self._word_vector_of = dict()
