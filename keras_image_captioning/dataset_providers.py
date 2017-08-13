@@ -48,8 +48,8 @@ class DatasetProvider(object):
                         self._batch_size))
 
     @property
-    def testing_steps(self):
-        return int(ceil(1. * self._dataset.testing_set_size /
+    def test_steps(self):
+        return int(ceil(1. * self._dataset.test_set_size /
                         self._batch_size))
 
     @property
@@ -72,8 +72,8 @@ class DatasetProvider(object):
                                            random_transform=False):
             yield batch
 
-    def testing_set(self, include_datum=False):
-        for batch in self._batch_generator(self._dataset.testing_set,
+    def test_set(self, include_datum=False):
+        for batch in self._batch_generator(self._dataset.test_set,
                                            include_datum,
                                            random_transform=False):
             yield batch

@@ -45,11 +45,11 @@ class TestFlickr8kDataset(object):
                 'A boy sand surf down a hill')
 
     def test__build_set(self, flickr8k):
-        img_set_filename = flickr8k._IMG_TESTING_FILENAME
-        testing_set = flickr8k._build_set(img_set_filename)
-        assert len(testing_set) == 1000 * 5
-        assert testing_set[0].img_filename == '3385593926_d3e9c21170.jpg'
-        assert testing_set[0].img_path.endswith('3385593926_d3e9c21170.jpg')
-        assert (testing_set[0].caption_txt ==
+        img_set_filename = flickr8k._IMG_TEST_FILENAME
+        test_set = flickr8k._build_set(img_set_filename)
+        assert len(test_set) == 1000 * 5
+        assert test_set[0].img_filename == '3385593926_d3e9c21170.jpg'
+        assert test_set[0].img_path.endswith('3385593926_d3e9c21170.jpg')
+        assert (test_set[0].caption_txt ==
                 'Dog be in the snow in front of a fence .')
-        assert len(testing_set[0].all_captions_txt) == 5
+        assert len(test_set[0].all_captions_txt) == 5

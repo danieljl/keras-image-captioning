@@ -36,9 +36,9 @@ class BasicInference(object):
                              self._dataset_provider.validation_steps,
                              include_datum)
 
-    def predict_testing_set(self, include_datum=True):
-        return self._predict(self._dataset_provider.testing_set,
-                             self._dataset_provider.testing_steps,
+    def predict_test_set(self, include_datum=True):
+        return self._predict(self._dataset_provider.test_set,
+                             self._dataset_provider.test_steps,
                              include_datum)
 
     def evaluate_training_set(self, include_prediction=False):
@@ -49,8 +49,8 @@ class BasicInference(object):
         return self._evaluate(self.predict_validation_set(include_datum=True),
                               include_prediction=include_prediction)
 
-    def evaluate_testing_set(self, include_prediction=False):
-        return self._evaluate(self.predict_testing_set(include_datum=True),
+    def evaluate_test_set(self, include_prediction=False):
+        return self._evaluate(self.predict_test_set(include_datum=True),
                               include_prediction=include_prediction)
 
     def _predict(self,

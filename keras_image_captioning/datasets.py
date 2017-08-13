@@ -30,8 +30,8 @@ class Dataset(object):
         return self._validation_set
 
     @property
-    def testing_set(self):
-        return self._testing_set
+    def test_set(self):
+        return self._test_set
 
     @property
     def training_set_size(self):
@@ -42,8 +42,8 @@ class Dataset(object):
         return len(self._validation_set)
 
     @property
-    def testing_set_size(self):
-        return len(self._testing_set)
+    def test_set_size(self):
+        return len(self._test_set)
 
     @property
     def dataset_dir(self):
@@ -68,7 +68,7 @@ class Flickr8kDataset(Dataset):
     _IMG_DIRNAME = 'Flickr8k_Dataset'
     _IMG_TRAINING_FILENAME = 'Flickr_8k.trainImages.txt'
     _IMG_VALIDATION_FILENAME = 'Flickr_8k.devImages.txt'
-    _IMG_TESTING_FILENAME = 'Flickr_8k.testImages.txt'
+    _IMG_TEST_FILENAME = 'Flickr_8k.testImages.txt'
 
     def __init__(self, lemmatize_caption, single_caption=False):
         super(Flickr8kDataset, self).__init__(self.DATASET_NAME,
@@ -80,7 +80,7 @@ class Flickr8kDataset(Dataset):
         self._captions_of = self._build_captions()
         self._training_set = self._build_set(self._IMG_TRAINING_FILENAME)
         self._validation_set = self._build_set(self._IMG_VALIDATION_FILENAME)
-        self._testing_set = self._build_set(self._IMG_TESTING_FILENAME)
+        self._test_set = self._build_set(self._IMG_TEST_FILENAME)
 
     def _build_captions(self):
         if self._lemmatize_caption:
