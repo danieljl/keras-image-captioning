@@ -250,11 +250,17 @@ class NLargest(object):
 Caption = namedtuple('Caption', 'log_prob sentence_encoded')
 
 
-def main(training_dir, method='beam_search', beam_size=3,
+def main(training_dir,
+         dataset_type='validation',
+         method='beam_search',
+         beam_size=3,
          max_caption_length=20):
     if method != 'beam_search':
         raise NotImplementedError('inference method = {} is not implemented '
                                   'yet!'.format(method))
+    if dataset_type not in ['validation', 'test']:
+        raise ValueError('dataset_type={} is not recognized!'.format(
+                                                                dataset_type))
 
     hyperparam_path = os.path.join(training_dir, 'hyperparams-config.yaml')
     model_weights_path = os.path.join(training_dir, 'model-weights.hdf5')
@@ -273,17 +279,21 @@ def main(training_dir, method='beam_search', beam_size=3,
     inference = BeamSearchInference(keras_model,
                                     beam_size=beam_size,
                                     max_caption_length=max_caption_length)
-    logging('Evaluating validation set..')
-    metrics, predictions = inference.evaluate_validation_set(
+    logging('Evaluating {} set..'.format(dataset_type))
+    if dataset_type == 'test':
+        metrics, predictions = inference.evaluate_test_set(
+                                                    include_prediction=True)
+    else:
+        metrics, predictions = inference.evaluate_validation_set(
                                                     include_prediction=True)
 
     logging('Writting result to files..')
     metrics_path = os.path.join(training_dir,
-            'validation-metrics-{}-{}.yaml'.format(beam_size,
-                                                   max_caption_length))
+            '{}-metrics-{}-{}.yaml'.format(dataset_type, beam_size,
+                                           max_caption_length))
     predictions_path = os.path.join(training_dir,
-            'validation-predictions-{}-{}.yaml'.format(beam_size,
-                                                       max_caption_length))
+            '{}-predictions-{}-{}.yaml'.format(dataset_type, beam_size,
+                                               max_caption_length))
     write_yaml_file(metrics, metrics_path)
     write_yaml_file(predictions, predictions_path)
 
