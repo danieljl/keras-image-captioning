@@ -2,6 +2,8 @@ import fire
 import heapq
 import numpy as np
 import os
+import random
+import string
 
 from collections import namedtuple
 from keras.engine.training import GeneratorEnqueuer
@@ -288,12 +290,14 @@ def main(training_dir,
                                                     include_prediction=True)
 
     logging('Writting result to files..')
+    label = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                    for _ in range(8))
     metrics_path = os.path.join(training_dir,
-            '{}-metrics-{}-{}.yaml'.format(dataset_type, beam_size,
-                                           max_caption_length))
+            '{}-metrics-{}-{}--{}.yaml'.format(dataset_type, beam_size,
+                                               max_caption_length, label))
     predictions_path = os.path.join(training_dir,
-            '{}-predictions-{}-{}.yaml'.format(dataset_type, beam_size,
-                                               max_caption_length))
+            '{}-predictions-{}-{}--{}.yaml'.format(dataset_type, beam_size,
+                                                   max_caption_length, label))
     write_yaml_file(metrics, metrics_path)
     write_yaml_file(predictions, predictions_path)
 
