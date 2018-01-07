@@ -74,7 +74,7 @@ For reproducing the model, execute:
 ```shell
 python -m keras_image_captioning.training \
   --training-label repro-final-model \
-  --from-training-dir results/final-model
+  --from-training-dir results/flickr8k/final-model
 ```
 
 There are many arguments available that you can look inside [`training.py`](keras_image_captioning/training.py).
