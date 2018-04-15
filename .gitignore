@@ -97,3 +97,4 @@ ENV/
 
 /pycocoevalcap/meteor/data/paraphrase-en.gz
 /pycocoevalcap/meteor/meteor-1.5.jar
+/results/flickr8k/final-model/model-weights.hdf5

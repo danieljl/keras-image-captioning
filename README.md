@@ -68,7 +68,24 @@ Quantitatively, the proposed model's performance is on par with Vinyals' model o
     source ./scripts/setup_pythonpath.sh
     ```
 
-## Run a Training
+## Using a Pretrained Model
+
+1. Download a pretrained model from [releases page](https://github.com/danieljl/keras-image-captioning/releases).
+
+2. Copy `model-weights.hdf5` to `keras-image-captioning/results/flickr8k/final-model`.
+
+3. Now you can run an inference from that checkpoint by executing a command below from `keras-image-captioning` directory:
+    ```shell
+    python -m keras_image_captioning.inference \
+    --dataset-type test \
+    --method beam_search \
+    --beam-size 3 \
+    --training-dir results/flickr8k/final-model
+    ```
+
+## Training from Scratch
+
+### 1. Run a Training
 
 For reproducing the model, execute:
 ```shell
@@ -79,7 +96,7 @@ python -m keras_image_captioning.training \
 
 There are many arguments available that you can look inside [`training.py`](keras_image_captioning/training.py).
 
-## Run an Inference and Evaluate It
+### 2. Run an Inference and Evaluate It
 
 ```shell
 python -m keras_image_captioning.inference \
