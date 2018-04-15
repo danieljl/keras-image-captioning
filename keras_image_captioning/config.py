@@ -139,47 +139,6 @@ class VinyalsConfigBuilder(ConfigBuilderBase):
                       image_augmentation=False)
 
 
-class PredefinedConfigBuilder(ConfigBuilderBase):
-    def __init__(self, predefined_configs):
-        self._predefined_configs = itertools.cycle(predefined_configs)
-
-    def build_config(self):
-        return next(self._predefined_configs)
-
-
-class Predefined1ConfigBuilder(PredefinedConfigBuilder):
-    def __init__(self):
-        base_config = BEST_CONFIGS['hpsearch/12-finer/0013']
-        base_config = base_config._replace(early_stopping_patience=sys.maxsize,
-                                           epochs=21)
-
-        configs = []
-        configs += [base_config]
-        configs += [base_config._replace(lemmatize_caption=False)]
-        configs += [base_config._replace(initializer='glorot_uniform')]
-        configs += [base_config._replace(rare_words_handling='discard',
-                                         words_min_occur=x)
-                    for x in range(1, 6)]
-
-        super(Predefined1ConfigBuilder, self).__init__(configs)
-
-
-class Predefined2ConfigBuilder(PredefinedConfigBuilder):
-    def __init__(self):
-        base_config = BEST_CONFIGS['hpsearch/12-finer/0013']
-        base_config = base_config._replace(early_stopping_patience=sys.maxsize,
-                                           epochs=41)
-
-        configs = []
-        for words_min_occur in range(1, 5):
-            configs += [base_config._replace(rare_words_handling='discard',
-                                             words_min_occur=words_min_occur),
-                        base_config._replace(rare_words_handling='discard',
-                                             words_min_occur=words_min_occur)]
-
-        super(Predefined2ConfigBuilder, self).__init__(configs)
-
-
 class RandomConfigBuilder(ConfigBuilderBase):
     def __init__(self, fixed_config_keys):
         """
@@ -253,39 +212,6 @@ class CoarseRandomConfigBuilder(RandomConfigBuilder):
         self._rnn_layers = lambda: randint(1, 5)
 
 
-class Coarse1RandomConfigBuilder(CoarseRandomConfigBuilder):
-    def __init__(self, fixed_config_keys):
-        super(Coarse1RandomConfigBuilder, self).__init__(fixed_config_keys)
-
-        self._embedding_size = lambda: 256
-        self._rnn_output_size = lambda: 256
-        self._rnn_type = lambda: 'lstm'
-        self._rnn_layers = lambda: 2
-
-
-class Coarse2RandomConfigBuilder(CoarseRandomConfigBuilder):
-    def __init__(self, fixed_config_keys):
-        super(Coarse2RandomConfigBuilder, self).__init__(fixed_config_keys)
-
-        # Values from hpsearch/07/0003
-        self._learning_rate = lambda: 1.656235e-03
-        self._dropout_rate = lambda: 8.887184e-02
-        self._l1_reg = lambda: 2.971412e-07
-        self._l2_reg = lambda: 2.816212e-05
-
-
-class Coarse3RandomConfigBuilder(CoarseRandomConfigBuilder):
-    def __init__(self, fixed_config_keys):
-        super(Coarse3RandomConfigBuilder, self).__init__(fixed_config_keys)
-
-        self._learning_rate = lambda: 10 ** uniform(-6, -1)
-
-        self._embedding_size = lambda: 512
-        self._rnn_output_size = lambda: 512
-        self._rnn_type = lambda: 'lstm'
-        self._rnn_layers = lambda: randint(1, 2)
-
-
 class FineRandomConfigBuilder(CoarseRandomConfigBuilder):
     def __init__(self, fixed_config_keys):
         super(FineRandomConfigBuilder, self).__init__(fixed_config_keys)
@@ -301,55 +227,6 @@ class FineRandomConfigBuilder(CoarseRandomConfigBuilder):
         self._rnn_output_size = lambda: int(2 ** uniform(7, 8))  # [128, 256]
         self._rnn_type = lambda: 'lstm'
         self._rnn_layers = lambda: randint(1, 3)
-
-
-class Fine1RandomConfigBuilder(FineRandomConfigBuilder):
-    def __init__(self, fixed_config_keys):
-        super(Fine1RandomConfigBuilder, self).__init__(fixed_config_keys)
-
-        # Values from hpsearch/08/0023
-        self._embedding_size = lambda: 135
-        self._rnn_output_size = lambda: 135
-        self._rnn_type = lambda: 'lstm'
-        self._rnn_layers = lambda: 3
-
-
-class FinerRandomConfigBuilder(FineRandomConfigBuilder):
-    def __init__(self, fixed_config_keys):
-        super(FinerRandomConfigBuilder, self).__init__(fixed_config_keys)
-
-        self._dropout_rate = lambda: uniform(0, 0.3)
-        self._l1_reg = lambda: 10 ** uniform(-8, -5)
-        self._l2_reg = lambda: 10 ** uniform(-7, -4)
-
-        self._rnn_layers = lambda: randint(2, 3)
-
-
-class VinyalsRandomConfigBuilder(RandomConfigBuilder):
-    def __init__(self, fixed_config_keys):
-        super(VinyalsRandomConfigBuilder, self).__init__(fixed_config_keys)
-
-        self._batch_size = lambda: 32
-        self._reduce_lr_factor = lambda: 1.0 - 1e-6
-        self._reduce_lr_patience = lambda: sys.maxsize
-        self._early_stopping_patience = lambda: 8
-        self._lemmatize_caption = lambda: True
-        self._rare_words_handling = lambda: 'discard'
-        self._words_min_occur = lambda: 5
-        self._bidirectional_rnn = lambda: False
-        self._initializer = lambda: 'vinyals_uniform'
-        self._word_vector_init = lambda: None
-
-        self._l1_reg = lambda: 0.0
-        self._l2_reg = lambda: 0.0
-
-        self._embedding_size = lambda: 512
-        self._rnn_output_size = lambda: 512
-        self._rnn_type = lambda: 'lstm'
-        self._rnn_layers = lambda: 1
-
-        self._learning_rate = lambda: 10**uniform(-4, -2)
-        self._dropout_rate = lambda: uniform(0.1, 0.6)
 
 
 class Embed300RandomConfigBuilder(RandomConfigBuilder):
